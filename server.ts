@@ -286,6 +286,16 @@ app.post("/api/exercises", authenticateToken, async (req: any, res) => {
   res.status(201).json(question);
 });
 
+// Analytics and Progress
+app.get("/api/progress/me", authenticateToken, async (req: any, res) => {
+  try {
+    const progress = await Progress.find({ userId: req.user.id });
+    res.json(progress);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Teacher Analytics
 app.get("/api/analytics/section/:sectionId", authenticateToken, async (req: any, res) => {
   if (req.user.role !== UserRole.TEACHER && req.user.role !== UserRole.ADMIN) return res.sendStatus(403);
@@ -354,14 +364,21 @@ app.all("/api/*", (req, res) => {
 
 // Helper for detection
 function detectDisregard(attempts: any[], feedbackLogs: any[]) {
-  if (attempts.length < 2) return { label: DisregardLabel.IDLE, reason: "Initial attempt" };
+  if (attempts.length === 0) return { label: DisregardLabel.IDLE, reason: "No attempts yet." };
+  
   const last = attempts[attempts.length - 1];
+  
+  // High priority: If it's correct, they applied something (even if internally)
+  if (last.isCorrect) return { label: DisregardLabel.APPLY, reason: "Success! Logic applied correctly." };
+
+  if (attempts.length < 2) return { label: DisregardLabel.IDLE, reason: "Initial attempt." };
+  
   const prev = attempts[attempts.length - 2];
   if (last.timeSinceLastFeedback && last.timeSinceLastFeedback > 300) return { label: DisregardLabel.DELAY, reason: "Inactivity." };
   if (last.code === prev.code) return { label: DisregardLabel.IGNORE, reason: "Identical submission." };
   if (!last.isCorrect && last.code !== prev.code) return { label: DisregardLabel.MISUNDERSTAND, reason: "Core issue not addressed." };
-  if (last.isCorrect) return { label: DisregardLabel.APPLY, reason: "Feedback applied." };
-  return { label: DisregardLabel.IDLE, reason: "No pattern." };
+  
+  return { label: DisregardLabel.IDLE, reason: "No pattern detected." };
 }
 
 const SEED_QUESTIONS = [
@@ -390,6 +407,19 @@ const SEED_QUESTIONS = [
     hint: "Nest <a> tags inside <li> tags, and use the <ul> container.",
     expectedOutput: "An unordered list with two links: Projects and Contact.",
     expectedOutputHtml: "<ul class='flex gap-4 justify-center py-4 text-blue-500 font-bold'><li><a href='#'>Projects</a></li><li><a href='#'>Contact</a></li></ul>"
+  },
+  {
+    id: "html-3",
+    topic: "HTML",
+    level: 2,
+    difficulty: DifficultyLevel.EASY,
+    title: "HTML Formatting",
+    description: "Use the <strong> tag to create a simple bolded element. This helps emphasize important keywords for both users and search engines.",
+    template: "<!-- Wrap important text in strong tags -->\n",
+    solution: "<strong>",
+    hint: "The <strong> tag is used specifically for strong importance.",
+    expectedOutput: "A strong element.",
+    expectedOutputHtml: "<div class='text-center py-4'><strong class='text-xl text-gray-800'>This is important!</strong></div>"
   }
 ];
 
