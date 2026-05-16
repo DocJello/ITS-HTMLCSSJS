@@ -53,6 +53,7 @@ const progressSchema = new mongoose.Schema({
   reason: { type: String },
   sentiment: { type: String },
   reflection: { type: String },
+  assessmentType: { type: String, enum: ['formative', 'summative', 'standard'], default: 'standard' },
   timestamp: { type: Date, default: Date.now },
 });
 
@@ -295,18 +296,17 @@ app.delete("/api/sections/:id", authenticateToken, async (req: any, res) => {
 // Questions
 app.get("/api/exercises", async (req, res) => {
   try {
-    const questions = await Question.find();
+    const questions = await Question.find().populate("authorId", "name role");
     console.log(`Fetched ${questions.length} questions from DB`);
     
-    // If no questions in DB, return default ones (optional migration)
+    // If no questions in DB, return default ones
     if (questions.length === 0) {
-      console.log("No questions found in database, returning SEED_QUESTIONS");
-      return res.json(SEED_QUESTIONS);
+      return res.json(SEED_QUESTIONS.map(q => ({ ...q, _id: q.id })));
     }
     res.json(questions);
   } catch (err: any) {
     console.error("Error fetching exercises:", err);
-    res.status(500).json({ error: "Failed to fetch exercises: " + err.message });
+    res.status(500).json({ error: "Failed to fetch exercises" });
   }
 });
 
