@@ -79,14 +79,22 @@ function Login({ onLogin }: { onLogin: (user: any, token: string) => void }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Action failed");
       
-      if (isRegistering) {
-        setIsRegistering(false);
-        setError("Account created! Please login.");
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Action failed");
+        
+        if (isRegistering) {
+          setIsRegistering(false);
+          setError("Account created! Please login.");
+        } else {
+          onLogin(data.user, data.token);
+        }
       } else {
-        onLogin(data.user, data.token);
+        const text = await res.text();
+        console.error("Non-JSON response:", text);
+        throw new Error(`Server returned non-JSON response (${res.status}). Check logs.`);
       }
     } catch (err: any) {
       setError(err.message);
