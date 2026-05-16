@@ -215,7 +215,7 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
     expectedOutput: ''
   });
 
-  const [teacherView, setTeacherView] = useState<"analytics" | "question_bank">("analytics");
+  const [teacherView, setTeacherView] = useState<"analytics" | "question_bank" | "all_sections">("analytics");
   const [allQuestions, setAllQuestions] = useState<ExerciseEntry[]>([]);
 
   useEffect(() => {
@@ -231,7 +231,27 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
       .then(res => res.json())
       .then(data => setAllQuestions(data))
       .catch(err => console.error("Exercises fetch error:", err));
-  }, [token]);
+  }, [token, teacherView]);
+
+  const toggleClaim = async (sectionId: string, currentTeacherId: string | null) => {
+    const isClaiming = currentTeacherId !== user.id;
+    if (isClaiming && currentTeacherId && !confirm("This section is already assigned to someone else. Do you want to take over?")) return;
+    
+    try {
+      const res = await fetch(`/api/sections/${sectionId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ teacherId: isClaiming ? user.id : null })
+      });
+      if (res.ok) {
+        const refreshRes = await fetch("/api/sections", { headers: { "Authorization": `Bearer ${token}` } });
+        setSections(await refreshRes.json());
+        alert(isClaiming ? "Section claimed!" : "Section released!");
+      }
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
 
   const [showSectionModal, setShowSectionModal] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
@@ -420,6 +440,12 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
               >
                 Question Bank
               </button>
+              <button 
+                onClick={() => setTeacherView("all_sections")}
+                className={`w-full text-left p-3 rounded-lg text-sm font-bold border transition-all ${teacherView === 'all_sections' ? 'bg-blue-50 border-linkedin-blue text-linkedin-blue' : 'hover:bg-gray-50 border-transparent'}`}
+              >
+                Browse Sections
+              </button>
             </div>
           </div>
 
@@ -460,7 +486,36 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
         </aside>
 
         <section className="lg:col-span-3 space-y-6">
-          {teacherView === "question_bank" ? (
+          {teacherView === "all_sections" ? (
+             <div className="bg-white p-8 rounded-xl border border-linkedin-border shadow-sm">
+               <h2 className="text-xl font-black mb-6 flex items-center gap-3">
+                 <GraduationCap className="text-linkedin-blue" />
+                 Global Section List ({sections.length})
+               </h2>
+               <div className="grid grid-cols-1 gap-4">
+                 {sections.map((s: any, i: number) => (
+                   <div key={i} className="p-5 border border-linkedin-border rounded-lg flex items-center justify-between hover:border-linkedin-blue transition-all">
+                     <div>
+                       <h4 className="font-black text-sm">{s.name}</h4>
+                       <p className="text-[10px] text-linkedin-text-muted mt-1 uppercase font-bold">
+                         Managed by: <span className={s.teacherId?._id === user.id ? 'text-linkedin-blue' : ''}>{s.teacherId?.name || "Unassigned"}</span>
+                       </p>
+                     </div>
+                     <button 
+                       onClick={() => toggleClaim(s._id, s.teacherId?._id)}
+                       className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                         s.teacherId?._id === user.id 
+                           ? 'bg-red-50 text-red-600 border border-red-100 hover:bg-red-100' 
+                           : 'bg-blue-50 text-linkedin-blue border border-blue-100 hover:bg-blue-100'
+                       }`}
+                     >
+                       {s.teacherId?._id === user.id ? 'Release Section' : s.teacherId ? 'Take Over' : 'Claim Section'}
+                     </button>
+                   </div>
+                 ))}
+               </div>
+             </div>
+          ) : teacherView === "question_bank" ? (
              <div className="bg-white p-8 rounded-xl border border-linkedin-border shadow-sm">
                <h2 className="text-xl font-black mb-6 flex items-center gap-3">
                  <Code2 className="text-linkedin-blue" />
@@ -546,24 +601,142 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
   );
 }
 
-function AdminDashboard({ user, token }: { user: User, token: string }) {
+function AdminDashboard({ user, token }: { user: User; token: string }) {
+  const [sections, setSections] = useState<any[]>([]);
+  const [teachers, setTeachers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [secRes, teachRes] = await Promise.all([
+          fetch("/api/sections", { headers: { Authorization: `Bearer ${token}` } }),
+          fetch("/api/users/teachers", { headers: { Authorization: `Bearer ${token}` } }),
+        ]);
+        const secData = await secRes.json();
+        const teachData = await teachRes.json();
+        setSections(secData || []);
+        setTeachers(teachData || []);
+      } catch (err) {
+        console.error("Admin data fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [token]);
+
+  const handleAssign = async (sectionId: string, teacherId: string) => {
+    try {
+      const res = await fetch(`/api/sections/${sectionId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ teacherId }),
+      });
+      if (res.ok) {
+        const refreshRes = await fetch("/api/sections", { headers: { Authorization: `Bearer ${token}` } });
+        const data = await refreshRes.json();
+        setSections(data || []);
+        alert("Teacher assigned successfully!");
+      }
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-20">
+        <RefreshCcw className="animate-spin text-linkedin-blue mb-4" />
+        <p className="text-sm font-bold text-gray-400">Loading Admin Console...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-[1128px] mx-auto px-4 py-12 text-center bg-white rounded-xl border border-linkedin-border shadow-sm">
-      <Lock size={48} className="mx-auto text-linkedin-blue mb-4" />
-      <h2 className="text-2xl font-black text-linkedin-text tracking-tighter">ADMIN CONSOLE</h2>
-      <p className="text-linkedin-text-muted mt-2">Manage the entire FIITS network from here.</p>
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-6 bg-blue-50 rounded-xl border border-blue-100">
-           <Users className="mx-auto mb-2 text-linkedin-blue" />
-           <p className="font-bold">Manage Users</p>
+    <div className="max-w-[1128px] mx-auto px-4 space-y-6">
+      <div className="bg-white p-8 rounded-xl border border-linkedin-border shadow-sm">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="bg-linkedin-blue p-3 rounded-xl shadow-lg">
+            <Lock className="text-white" size={24} />
+          </div>
+          <div>
+            <h2 className="text-2xl font-black text-linkedin-text tracking-tighter uppercase">Admin Console</h2>
+            <p className="text-xs text-linkedin-text-muted font-bold">Override and manage teacher-section assignments</p>
+          </div>
         </div>
-        <div className="p-6 bg-blue-50 rounded-xl border border-blue-100">
-           <GraduationCap className="mx-auto mb-2 text-linkedin-blue" />
-           <p className="font-bold">Manage Sections</p>
+
+        <div className="grid grid-cols-1 gap-6">
+          <div className="bg-white rounded-lg border border-linkedin-border overflow-hidden">
+            <div className="px-6 py-4 border-b border-linkedin-border bg-gray-50 flex items-center justify-between">
+              <h3 className="text-xs font-black uppercase tracking-widest text-linkedin-text-muted flex items-center gap-2">
+                <Users size={14} /> Section Assignments
+              </h3>
+              <span className="text-[10px] font-bold text-linkedin-blue">{sections.length} Sections Total</span>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-linkedin-border text-[10px] font-black uppercase tracking-wider text-gray-400">
+                    <th className="px-6 py-4">Section Name</th>
+                    <th className="px-6 py-4">Assigned Teacher</th>
+                    <th className="px-6 py-4">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {sections.map((section) => (
+                    <tr key={section._id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 font-bold">{section.name}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-linkedin-text">{section.teacherId?.name || "Unassigned"}</span>
+                          <span className="text-[10px] text-gray-400">{section.teacherId?.email}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <select 
+                            className="text-xs p-2 border rounded-lg outline-none focus:ring-1 focus:ring-linkedin-blue"
+                            defaultValue={section.teacherId?._id || ""}
+                            onChange={(e) => handleAssign(section._id, e.target.value)}
+                          >
+                            <option value="">Re-assign Teacher</option>
+                            {teachers.map(t => (
+                              <option key={t._id} value={t._id}>{t.name} ({t.email})</option>
+                            ))}
+                          </select>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {sections.length === 0 && (
+                    <tr>
+                      <td colSpan={3} className="px-6 py-12 text-center text-gray-400 font-bold">No sections found.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <div className="p-6 bg-blue-50 rounded-xl border border-blue-100">
-           <Code2 className="mx-auto mb-2 text-linkedin-blue" />
-           <p className="font-bold">Global Question Bank</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="p-6 bg-white rounded-xl border border-linkedin-border shadow-sm">
+           <Users className="mb-2 text-linkedin-blue" />
+           <p className="font-black text-sm uppercase">Manage Users</p>
+           <p className="text-xs text-linkedin-text-muted mt-1">Student and teacher records.</p>
+        </div>
+        <div className="p-6 bg-white rounded-xl border border-linkedin-border shadow-sm">
+           <GraduationCap className="mb-2 text-linkedin-blue" />
+           <p className="font-black text-sm uppercase">Manage Sections</p>
+           <p className="text-xs text-linkedin-text-muted mt-1">Create or remove student groups.</p>
+        </div>
+        <div className="p-6 bg-white rounded-xl border border-linkedin-border shadow-sm">
+           <Code2 className="mb-2 text-linkedin-blue" />
+           <p className="font-black text-sm uppercase">Global Bank</p>
+           <p className="text-xs text-linkedin-text-muted mt-1">Core exercise curriculum.</p>
         </div>
       </div>
     </div>
