@@ -54,13 +54,26 @@ const progressSchema = new mongoose.Schema({
   sentiment: { type: String },
   reflection: { type: String },
   assessmentType: { type: String, enum: ['formative', 'summative', 'standard'], default: 'standard' },
+  score: { type: Number },
+  totalPoints: { type: Number },
   timestamp: { type: Date, default: Date.now },
+});
+
+const assessmentSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  type: { type: String, enum: ['formative', 'summative'], required: true },
+  moduleId: { type: String, required: true },
+  topic: { type: String, enum: ['HTML', 'CSS', 'JavaScript'], required: true },
+  questionIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
+  authorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  createdAt: { type: Date, default: Date.now },
 });
 
 const User = mongoose.model("User", userSchema);
 const Section = mongoose.model("Section", sectionSchema);
 const Question = mongoose.model("Question", questionSchema);
 const Progress = mongoose.model("Progress", progressSchema);
+const Assessment = mongoose.model("Assessment", assessmentSchema);
 
 // --- MongoDB Connection ---
 let cachedConnection: typeof mongoose | null = null;
@@ -327,6 +340,35 @@ app.get("/api/progress/me", authenticateToken, async (req: any, res) => {
   }
 });
 
+// Assessment Routes
+app.get("/api/assessments", authenticateToken, async (req: any, res) => {
+  try {
+    const { moduleId, topic, type } = req.query;
+    const query: any = {};
+    if (moduleId) query.moduleId = moduleId;
+    if (topic) query.topic = topic;
+    if (type) query.type = type;
+    const assessments = await Assessment.find(query).populate("questionIds").populate("authorId", "name");
+    res.json(assessments);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/assessments", authenticateToken, async (req: any, res) => {
+  if (req.user.role !== UserRole.TEACHER && req.user.role !== UserRole.ADMIN) return res.sendStatus(403);
+  try {
+    const assessment = new Assessment({ 
+      ...req.body, 
+      authorId: req.user.id 
+    });
+    await assessment.save();
+    res.status(201).json(assessment);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Teacher Analytics
 app.get("/api/analytics/section/:sectionId", authenticateToken, async (req: any, res) => {
   if (req.user.role !== UserRole.TEACHER && req.user.role !== UserRole.ADMIN) return res.sendStatus(403);
@@ -339,7 +381,7 @@ app.get("/api/analytics/section/:sectionId", authenticateToken, async (req: any,
 // Student Progress
 app.post("/api/adaptive/analyze", authenticateToken, async (req: any, res) => {
   try {
-    const { reflection, attempts, feedbackLogs, exerciseId } = req.body;
+    const { reflection, attempts, feedbackLogs, exerciseId, assessmentType, score, totalPoints } = req.body;
     
     // Rule-based classification (reused from previous version)
     const ruleResult = detectDisregard(attempts || [], feedbackLogs || []);
@@ -378,7 +420,10 @@ app.post("/api/adaptive/analyze", authenticateToken, async (req: any, res) => {
       label: ruleResult.label,
       reason: ruleResult.reason,
       sentiment: nlpResult.sentiment,
-      reflection
+      reflection,
+      assessmentType: assessmentType || 'standard',
+      score,
+      totalPoints
     });
     await progress.save();
 
