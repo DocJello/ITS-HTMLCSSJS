@@ -95,12 +95,15 @@ if (!process.env.VERCEL && process.env.MONGODB_URI) {
 
 const checkDbConnection = async (req: any, res: any, next: any) => {
   try {
+    console.log(`Checking connection state: ${mongoose.connection.readyState}`);
     await connectToDatabase();
     if (mongoose.connection.readyState !== 1) {
+      console.warn("Database not ready, returning 503");
       return res.status(503).json({ error: "Database connecting... please try again in a moment." });
     }
     next();
   } catch (err: any) {
+    console.error("Critical database error in middleware:", err);
     return res.status(500).json({ error: "Database connection failed. Ensure MONGODB_URI is set correctly. Error: " + err.message });
   }
 };
