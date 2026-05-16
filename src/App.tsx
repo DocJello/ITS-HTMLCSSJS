@@ -21,7 +21,9 @@ import {
   Users,
   PlusCircle,
   GraduationCap,
-  Trash2
+  Trash2,
+  Check,
+  ClipboardCheck
 } from "lucide-react";
 import { 
   ExerciseEntry, 
@@ -34,7 +36,8 @@ import {
   Section, 
   DifficultyLevel,
   Module,
-  Submodule
+  Submodule,
+  Assessment
 } from "./types";
 
 const MODULES: Module[] = [
@@ -313,8 +316,17 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
     expectedOutput: ''
   });
 
-  const [teacherView, setTeacherView] = useState<"analytics" | "question_bank" | "all_sections">("analytics");
+  const [teacherView, setTeacherView] = useState<"analytics" | "question_bank" | "all_sections" | "assessments">("analytics");
   const [allQuestions, setAllQuestions] = useState<ExerciseEntry[]>([]);
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [showAssessmentModal, setShowAssessmentModal] = useState(false);
+  const [newAssessment, setNewAssessment] = useState({
+    title: "",
+    type: "formative" as "formative" | "summative",
+    moduleId: MODULES[0].id,
+    topic: MODULES[0].topic,
+    questionIds: [] as string[]
+  });
 
   useEffect(() => {
     fetch("/api/sections", { headers: { "Authorization": `Bearer ${token}` } })
@@ -329,6 +341,11 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
       .then(res => res.json())
       .then(data => setAllQuestions(data))
       .catch(err => console.error("Exercises fetch error:", err));
+
+    fetch("/api/assessments", { headers: { "Authorization": `Bearer ${token}` } })
+      .then(res => res.json())
+      .then(data => setAssessments(data || []))
+      .catch(err => console.error("Assessments fetch error:", err));
   }, [token, teacherView]);
 
   const toggleClaim = async (sectionId: string, currentTeacherId: string | null) => {
@@ -392,10 +409,42 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
       });
       if (res.ok) {
         setShowCreateModal(false);
+        const refreshRes = await fetch("/api/exercises");
+        setAllQuestions(await refreshRes.json());
       }
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const createAssessment = async (e: FormEvent) => {
+    e.preventDefault();
+    if (newAssessment.questionIds.length === 0) return alert("Select at least one question");
+    try {
+      const res = await fetch("/api/assessments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(newAssessment)
+      });
+      if (res.ok) {
+        setShowAssessmentModal(false);
+        setNewAssessment({ ...newAssessment, title: "", questionIds: [] });
+        const refreshRes = await fetch("/api/assessments", { headers: { "Authorization": `Bearer ${token}` } });
+        setAssessments(await refreshRes.json());
+        alert("Assessment created successfully!");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleQuestionSelection = (qId: string) => {
+    setNewAssessment(prev => ({
+      ...prev,
+      questionIds: prev.questionIds.includes(qId) 
+        ? prev.questionIds.filter(id => id !== qId)
+        : [...prev.questionIds, qId]
+    }));
   };
 
   const addSection = async (e: FormEvent) => {
@@ -519,6 +568,96 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
         </div>
       )}
 
+      {showAssessmentModal && (
+        <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-black mb-6">Create Custom Assessment</h2>
+            <form onSubmit={createAssessment} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-gray-400 pl-1">Title</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. HTML Quiz 1" 
+                    className="w-full p-3 border rounded-lg"
+                    value={newAssessment.title}
+                    onChange={(e) => setNewAssessment({...newAssessment, title: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-gray-400 pl-1">Type</label>
+                  <select 
+                    value={newAssessment.type} 
+                    onChange={(e) => setNewAssessment({...newAssessment, type: e.target.value as any})}
+                    className="w-full p-3 border rounded-lg bg-white"
+                  >
+                    <option value="formative">Formative (Pre-test)</option>
+                    <option value="summative">Summative (Post-test)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-gray-400 pl-1">Topic</label>
+                  <select 
+                    value={newAssessment.topic} 
+                    onChange={(e) => setNewAssessment({...newAssessment, topic: e.target.value as any})}
+                    className="w-full p-3 border rounded-lg bg-white"
+                  >
+                    <option value="HTML">HTML</option>
+                    <option value="CSS">CSS</option>
+                    <option value="JavaScript">JavaScript</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black uppercase text-gray-400 pl-1">Module Alignment</label>
+                  <select 
+                    value={newAssessment.moduleId} 
+                    onChange={(e) => setNewAssessment({...newAssessment, moduleId: e.target.value})}
+                    className="w-full p-3 border rounded-lg bg-white"
+                  >
+                    {MODULES.map(m => (
+                      <option key={m.id} value={m.id}>{m.title}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-gray-400 pl-1 flex justify-between">
+                  <span>Question Selection ({newAssessment.questionIds.length} selected)</span>
+                  <span className="text-linkedin-blue">Filter: {newAssessment.topic}</span>
+                </label>
+                <div className="border border-linkedin-border rounded-lg overflow-hidden max-h-48 overflow-y-auto">
+                  {allQuestions.filter(q => q.topic === newAssessment.topic).map(q => (
+                    <div 
+                      key={(q as any)._id || q.id} 
+                      onClick={() => toggleQuestionSelection((q as any)._id || q.id)}
+                      className={`p-3 border-b border-gray-50 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors ${newAssessment.questionIds.includes((q as any)._id || q.id) ? 'bg-blue-50' : ''}`}
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold">{q.title}</span>
+                        <span className="text-[10px] text-gray-400 uppercase font-bold">{q.difficulty}</span>
+                      </div>
+                      <div className={`w-5 h-5 rounded-md border flex items-center justify-center ${newAssessment.questionIds.includes((q as any)._id || q.id) ? 'bg-linkedin-blue border-linkedin-blue text-white' : 'border-gray-200'}`}>
+                        {newAssessment.questionIds.includes((q as any)._id || q.id) && <Check size={14} />}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button type="submit" className="flex-1 bg-linkedin-blue text-white py-3 rounded-lg font-bold shadow-md hover:bg-blue-700">Create Assessment</button>
+                <button type="button" onClick={() => setShowAssessmentModal(false)} className="px-6 py-3 border rounded-lg font-bold text-gray-500">Cancel</button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <aside className="space-y-4">
           <div className="bg-white p-6 rounded-xl border border-linkedin-border shadow-sm mb-4">
@@ -543,6 +682,12 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
                 className={`w-full text-left p-3 rounded-lg text-sm font-bold border transition-all ${teacherView === 'all_sections' ? 'bg-blue-50 border-linkedin-blue text-linkedin-blue' : 'hover:bg-gray-50 border-transparent'}`}
               >
                 Browse Sections
+              </button>
+              <button 
+                onClick={() => setTeacherView("assessments")}
+                className={`w-full text-left p-3 rounded-lg text-sm font-bold border transition-all ${teacherView === 'assessments' ? 'bg-blue-50 border-linkedin-blue text-linkedin-blue' : 'hover:bg-gray-50 border-transparent'}`}
+              >
+                Assessments
               </button>
             </div>
           </div>
@@ -578,13 +723,53 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
             </h3>
             <div className="space-y-2">
               <button onClick={() => setShowCreateModal(true)} className="w-full bg-linkedin-blue text-white py-2 rounded-lg font-bold text-xs shadow-md active:scale-95">Create New Question</button>
+              <button onClick={() => setShowAssessmentModal(true)} className="w-full bg-blue-50 text-linkedin-blue border border-linkedin-blue py-2 rounded-lg font-bold text-xs shadow-sm active:scale-95">Create Assessment</button>
               <button onClick={() => setShowSectionModal(true)} className="w-full bg-white text-linkedin-blue border border-linkedin-blue py-2 rounded-lg font-bold text-xs shadow-sm active:scale-95">Add New Section</button>
             </div>
           </div>
         </aside>
 
         <section className="lg:col-span-2 space-y-6">
-          {teacherView === "all_sections" ? (
+          {teacherView === "assessments" ? (
+            <div className="bg-white p-8 rounded-xl border border-linkedin-border shadow-sm">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-xl font-black flex items-center gap-3">
+                  <ClipboardCheck className="text-linkedin-blue" />
+                  Custom Assessments ({assessments.length})
+                </h2>
+                <button onClick={() => setShowAssessmentModal(true)} className="bg-linkedin-blue text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest shadow-md">
+                  New Assessment
+                </button>
+              </div>
+              <div className="grid grid-cols-1 gap-4">
+                {assessments.map((a: any) => (
+                  <div key={a._id} className="p-5 border border-linkedin-border rounded-lg hover:border-linkedin-blue transition-all group">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase mr-2 ${a.type === 'formative' ? 'bg-orange-50 text-orange-600 border border-orange-100' : 'bg-green-50 text-green-600 border border-green-100'}`}>
+                          {a.type}
+                        </span>
+                        <span className="text-[10px] font-bold text-linkedin-text-muted uppercase">{a.topic} • Module {a.moduleId}</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-gray-400">Created by {a.authorId?.name || "System"}</span>
+                    </div>
+                    <h3 className="text-sm font-black mb-2">{a.title}</h3>
+                    <p className="text-[10px] text-linkedin-text-muted mb-4">{a.questionIds?.length || 0} Questions included</p>
+                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button className="text-[10px] font-black text-linkedin-blue uppercase">Edit</button>
+                      <button className="text-[10px] font-black text-red-500 uppercase">Delete</button>
+                    </div>
+                  </div>
+                ))}
+                {assessments.length === 0 && (
+                  <div className="text-center py-12 border-2 border-dashed border-gray-100 rounded-xl">
+                    <History className="mx-auto text-gray-300 mb-2" size={32} />
+                    <p className="text-sm font-bold text-gray-400">No custom assessments created yet.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : teacherView === "all_sections" ? (
              <div className="bg-white p-8 rounded-xl border border-linkedin-border shadow-sm">
                <h2 className="text-xl font-black mb-6 flex items-center gap-3">
                  <GraduationCap className="text-linkedin-blue" />
@@ -751,18 +936,21 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
   );
 }
 
-function StudentModules({ user, token, onStartAssessment }: { user: User; token: string; onStartAssessment: (topic: string, type: 'formative' | 'summative', subId: string) => void }) {
+function StudentModules({ user, token, onStartAssessment }: { user: User; token: string; onStartAssessment: (topic: string, type: 'formative' | 'summative', subId: string, customAssessment?: Assessment) => void }) {
   const [selectedSubmodule, setSelectedSubmodule] = useState<Submodule | null>(null);
   const [progress, setProgress] = useState<any[]>([]);
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/progress/me", { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => res.json())
-      .then(data => {
-        setProgress(data || []);
-        setLoading(false);
-      });
+    Promise.all([
+      fetch("/api/progress/me", { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()),
+      fetch("/api/assessments", { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json())
+    ]).then(([progressData, assessmentData]) => {
+      setProgress(progressData || []);
+      setAssessments(assessmentData || []);
+      setLoading(false);
+    });
   }, [token]);
 
   const isCompleted = (submoduleId: string) => progress.some(p => p.exerciseId === submoduleId);
@@ -932,16 +1120,22 @@ function StudentModules({ user, token, onStartAssessment }: { user: User; token:
                     {/* Module Assessments Footer */}
                     <div className={`px-6 py-4 bg-gray-50 flex gap-4 transition-all ${allSubsViewed ? 'opacity-100' : 'opacity-40 grayscale pointer-events-none'}`}>
                       <button 
-                        onClick={() => onStartAssessment(m.topic, 'formative', m.id)}
+                        onClick={() => {
+                          const custom = assessments.find(a => a.moduleId === m.id && a.topic === m.topic && a.type === 'formative');
+                          onStartAssessment(m.topic, 'formative', m.id, custom);
+                        }}
                         className={`flex-1 py-2 rounded-lg border font-black text-[10px] uppercase tracking-widest transition-all ${isModuleAssessPassed(m.id, 'formative') ? 'bg-green-50 border-green-200 text-green-600' : 'bg-white border-linkedin-border text-linkedin-text hover:border-linkedin-blue'}`}
                       >
-                        {isModuleAssessPassed(m.id, 'formative') ? 'Formative Passed' : 'Start Formative (Pre-test)'}
+                        {isModuleAssessPassed(m.id, 'formative') ? 'Formative Passed' : assessments.some(a => a.moduleId === m.id && a.type === 'formative') ? 'Start Custom Formative' : 'Start Formative (Pre-test)'}
                       </button>
                       <button 
-                        onClick={() => onStartAssessment(m.topic, 'summative', m.id)}
+                        onClick={() => {
+                          const custom = assessments.find(a => a.moduleId === m.id && a.topic === m.topic && a.type === 'summative');
+                          onStartAssessment(m.topic, 'summative', m.id, custom);
+                        }}
                         className={`flex-1 py-2 rounded-lg border font-black text-[10px] uppercase tracking-widest transition-all ${isModuleAssessPassed(m.id, 'summative') ? 'bg-green-50 border-green-200 text-green-600' : 'bg-linkedin-blue border-linkedin-blue text-white hover:bg-blue-800'}`}
                       >
-                        {isModuleAssessPassed(m.id, 'summative') ? 'Summative Passed' : 'Start Summative (Post-test)'}
+                        {isModuleAssessPassed(m.id, 'summative') ? 'Summative Passed' : assessments.some(a => a.moduleId === m.id && a.type === 'summative') ? 'Start Custom Summative' : 'Start Summative (Post-test)'}
                       </button>
                     </div>
                   </div>
@@ -1170,6 +1364,8 @@ export default function App() {
   const [feedback, setFeedback] = useState<DetectionResult | null>(null);
   const [appState, setAppState] = useState<"solving" | "reflecting" | "complete" | "teacher_dashboard" | "admin_dashboard" | "modules">("modules");
   const [assessmentMode, setAssessmentMode] = useState<{ topic: string, type: 'formative' | 'summative', id: string } | null>(null);
+  const [assessmentScore, setAssessmentScore] = useState(0);
+  const [assessmentTotalPoints, setAssessmentTotalPoints] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [showHint, setShowHint] = useState(false);
   
@@ -1260,15 +1456,20 @@ export default function App() {
     }
   };
 
-  const startAssessment = async (topic: string, type: 'formative' | 'summative', subId: string) => {
+  const startAssessment = async (topic: string, type: 'formative' | 'summative', subId: string, customAssessment?: Assessment) => {
     try {
-      const res = await fetch("/api/exercises");
-      const allEx = await res.json();
-      const filtered = allEx.filter((ex: any) => {
-        const topicMatch = ex.topic.toLowerCase() === topic.toLowerCase();
-        if (type === 'formative') return topicMatch && ex.difficulty === DifficultyLevel.EASY;
-        return topicMatch && (ex.difficulty === DifficultyLevel.MEDIUM || ex.difficulty === DifficultyLevel.HARD);
-      });
+      let filtered: ExerciseEntry[] = [];
+      if (customAssessment && customAssessment.questionIds) {
+        filtered = customAssessment.questionIds;
+      } else {
+        const res = await fetch("/api/exercises");
+        const allEx = await res.json();
+        filtered = allEx.filter((ex: any) => {
+          const topicMatch = ex.topic.toLowerCase() === topic.toLowerCase();
+          if (type === 'formative') return topicMatch && ex.difficulty === DifficultyLevel.EASY;
+          return topicMatch && (ex.difficulty === DifficultyLevel.MEDIUM || ex.difficulty === DifficultyLevel.HARD);
+        });
+      }
 
       if (filtered.length === 0) {
         alert("No questions found for this assessment level in the bank.");
@@ -1279,6 +1480,9 @@ export default function App() {
       setCurrentIdx(0);
       setCode(filtered[0].template);
       setAssessmentMode({ topic, type, id: subId });
+      setAssessmentScore(0);
+      const total = filtered.reduce((acc, q) => acc + (q.difficulty === DifficultyLevel.HARD ? 3 : q.difficulty === DifficultyLevel.MEDIUM ? 2 : 1), 0);
+      setAssessmentTotalPoints(total);
       setAppState("solving");
     } catch (err) {
       console.error(err);
@@ -1356,7 +1560,9 @@ export default function App() {
           attempts,
           feedbackLogs,
           exerciseId: assessmentMode ? `${assessmentMode.id}-${assessmentMode.type}` : ((currentExercise as any)?._id || currentExercise?.id),
-          assessmentType: assessmentMode?.type || 'standard'
+          assessmentType: assessmentMode?.type || 'standard',
+          score: assessmentMode ? assessmentScore : undefined,
+          totalPoints: assessmentMode ? assessmentTotalPoints : undefined
         })
       });
       const data = await res.json();
@@ -1373,6 +1579,13 @@ export default function App() {
   };
 
   const handleNext = () => {
+    // Point system integration
+    if (assessmentMode && (feedback?.label === 'APPLY' || feedback?.suggestedAction === 'next')) {
+       const difficulty = currentExercise?.difficulty;
+       const points = difficulty === DifficultyLevel.HARD ? 3 : difficulty === DifficultyLevel.MEDIUM ? 2 : 1;
+       setAssessmentScore(prev => prev + points);
+    }
+
     if (currentIdx < exercises.length - 1) {
       const nextIdx = currentIdx + 1;
       setCurrentIdx(nextIdx);
@@ -1387,7 +1600,7 @@ export default function App() {
     } else {
       setAppState("complete");
       if (assessmentMode) {
-        alert(`${assessmentMode.type} assessment completed!`);
+        alert(`${assessmentMode.topic} - ${assessmentMode.type} assessment completed! Score: ${assessmentScore}/${assessmentTotalPoints}`);
         setAssessmentMode(null);
         setAppState("modules");
       }
