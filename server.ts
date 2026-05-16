@@ -88,9 +88,24 @@ async function connectToDatabase() {
   }
 }
 
-// Initial connection for non-vercel
+// Initial connection and seeding for non-vercel
 if (!process.env.VERCEL && process.env.MONGODB_URI) {
-  connectToDatabase();
+  connectToDatabase().then(async () => {
+    // Seed Admin
+    const adminEmail = "admin";
+    const existingAdmin = await User.findOne({ email: adminEmail });
+    if (!existingAdmin) {
+      const hashedAdminPassword = await bcrypt.hash("admin123", 10);
+      const admin = new User({
+        email: adminEmail,
+        password: hashedAdminPassword,
+        name: "System Admin",
+        role: UserRole.ADMIN
+      });
+      await admin.save();
+      console.log("Admin account seeded: admin / admin123");
+    }
+  });
 }
 
 const checkDbConnection = async (req: any, res: any, next: any) => {
@@ -218,10 +233,41 @@ app.get("/api/auth/me", authenticateToken, async (req: any, res) => {
 // Sections
 app.get("/api/sections", async (req, res) => {
   try {
-    const sections = await Section.find().populate("teacherId", "name");
+    const sections = await Section.find().populate("teacherId", "name email");
     res.json(sections);
   } catch (err: any) {
     console.error("Error fetching sections:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/users/teachers", authenticateToken, async (req: any, res) => {
+  if (req.user.role !== UserRole.ADMIN) return res.sendStatus(403);
+  try {
+    const teachers = await User.find({ role: UserRole.TEACHER }).select("name email _id");
+    res.json(teachers);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch("/api/sections/:id", authenticateToken, async (req: any, res) => {
+  try {
+    const section = await Section.findById(req.params.id);
+    if (!section) return res.status(404).json({ error: "Section not found" });
+
+    // Admin can update anything. Teacher can only update their own section (or take over if unassigned?)
+    // User requested teachers can assign sections to themselves.
+    if (req.user.role !== UserRole.ADMIN && req.user.role !== UserRole.TEACHER) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    if (req.body.name) section.name = req.body.name;
+    if (req.body.teacherId) section.teacherId = req.body.teacherId;
+
+    await section.save();
+    res.json(section);
+  } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
