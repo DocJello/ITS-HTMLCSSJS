@@ -62,26 +62,26 @@ const Question = mongoose.model("Question", questionSchema);
 const Progress = mongoose.model("Progress", progressSchema);
 
 // --- MongoDB Connection ---
-const mongoUri = process.env.MONGODB_URI;
-let isConnected = false;
+let cachedConnection: typeof mongoose | null = null;
 
 async function connectToDatabase() {
-  if (isConnected && mongoose.connection.readyState === 1) {
-    return;
+  if (cachedConnection && mongoose.connection.readyState === 1) {
+    return cachedConnection;
   }
 
+  const mongoUri = process.env.MONGODB_URI;
   if (!mongoUri) {
-    console.warn("MONGODB_URI not defined. Database persistence disabled.");
-    return;
+    throw new Error("MONGODB_URI is not defined in environment variables.");
   }
 
   try {
     const opts = {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s
     };
-    await mongoose.connect(mongoUri, opts);
-    isConnected = true;
-    console.log("Connected to MongoDB Atlas via Mongoose");
+    cachedConnection = await mongoose.connect(mongoUri, opts);
+    console.log("Connected to MongoDB via Mongoose");
+    return cachedConnection;
   } catch (err) {
     console.error("MongoDB connection error:", err);
     throw err;
@@ -89,22 +89,19 @@ async function connectToDatabase() {
 }
 
 // Initial connection for non-vercel
-if (!process.env.VERCEL && mongoUri) {
+if (!process.env.VERCEL && process.env.MONGODB_URI) {
   connectToDatabase();
 }
 
 const checkDbConnection = async (req: any, res: any, next: any) => {
   try {
     await connectToDatabase();
-    if (mongoose.connection.readyState !== 1 && mongoUri) {
+    if (mongoose.connection.readyState !== 1) {
       return res.status(503).json({ error: "Database connecting... please try again in a moment." });
-    }
-    if (!mongoUri) {
-      return res.status(500).json({ error: "Database configuration error (MONGODB_URI missing). Please check your Environment Variables." });
     }
     next();
   } catch (err: any) {
-    return res.status(500).json({ error: "Database connection failed: " + err.message });
+    return res.status(500).json({ error: "Database connection failed. Ensure MONGODB_URI is set correctly. Error: " + err.message });
   }
 };
 
@@ -196,7 +193,11 @@ app.post("/api/auth/login", checkDbConnection, async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
     
-    const token = jwt.sign({ id: user._id, role: user.role, email: user.email, name: user.name }, JWT_SECRET);
+    const token = jwt.sign(
+      { id: user._id.toString(), role: user.role, email: user.email, name: user.name }, 
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
     console.log(`Login success: ${email}`);
     res.json({ token, user: { id: user._id, role: user.role, name: user.name, email: user.email, sectionId: user.sectionId } });
   } catch (err: any) {
