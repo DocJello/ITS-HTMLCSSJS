@@ -12,19 +12,19 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@google/genai": "^1.29.0",
+    "@google/genai": "^2.3.0",
     "@monaco-editor/react": "^4.7.0",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
-    "bcryptjs": "^3.0.3",
-    "cors": "^2.8.6",
-    "dotenv": "^17.2.3",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "groq-sdk": "^1.2.0",
-    "jsonwebtoken": "^9.0.3",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.546.0",
     "mongodb": "^6.13.0",
-    "mongoose": "^8.10.1",
+    "mongoose": "^9.6.2",
     "motion": "^12.38.0",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
@@ -41,5 +41,8 @@
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.3"
+  },
+  "overrides": {
+    "node-domexception": "1.0.0"
   }
 }
