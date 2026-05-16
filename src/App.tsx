@@ -629,13 +629,42 @@ export default function App() {
   }, [token]);
 
   useEffect(() => {
-    fetch("/api/exercises")
-      .then(res => res.json())
-      .then(data => {
-        setExercises(data);
-        if (data.length > 0) setCode(data[0].template);
-      });
-  }, []);
+    const loadData = async () => {
+      try {
+        const exRes = await fetch("/api/exercises");
+        const exData = await exRes.json();
+        setExercises(exData);
+        
+        if (token && exData.length > 0) {
+          const progRes = await fetch("/api/progress/me", { 
+            headers: { "Authorization": `Bearer ${token}` } 
+          });
+          const progData = await progRes.json();
+          
+          if (progData.length > 0) {
+            const completedIds = new Set(progData.map((p: any) => p.exerciseId));
+            const nextIdx = exData.findIndex((ex: any) => !completedIds.has(ex._id || ex.id));
+            
+            if (nextIdx !== -1) {
+              setCurrentIdx(nextIdx);
+              setCode(exData[nextIdx].template);
+            } else {
+              setCurrentIdx(exData.length - 1);
+              setCode(exData[exData.length - 1].template);
+              setAppState("complete");
+            }
+          } else {
+            setCode(exData[0].template);
+          }
+        } else if (exData.length > 0) {
+          setCode(exData[0].template);
+        }
+      } catch (err) {
+        console.error("Failed to load exercises or progress:", err);
+      }
+    };
+    loadData();
+  }, [token]);
 
   const handleLogin = (u: User, t: string) => {
     localStorage.setItem("fiits_token", t);
@@ -761,6 +790,8 @@ export default function App() {
       setAppState("solving");
       setError(null);
       setShowHint(false);
+    } else {
+      setAppState("complete");
     }
   };
 
@@ -830,13 +861,13 @@ export default function App() {
         ) : appState === "admin_dashboard" ? (
           <AdminDashboard user={user} token={token} />
         ) : !currentExercise ? (
-          <div className="flex flex-col items-center justify-center min-h-[60vh] bg-white rounded-xl border border-linkedin-border shadow-sm">
+          <div className="flex flex-col items-center justify-center min-h-[60vh] bg-white rounded-xl border border-linkedin-border shadow-sm w-full">
             <RefreshCcw className="animate-spin text-linkedin-blue mb-4" size={48} />
             <p className="text-lg font-bold text-gray-400 tracking-tight">Syncing exercises with mentor bank...</p>
             <p className="text-xs text-gray-400 mt-2">If this takes too long, ensure exercises are seeded in the database.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-[30%_40%_30%] gap-6 items-start w-full max-w-none mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-[30%_40%_30%] gap-6 items-start w-full max-w-none">
             {/* Left Column: Task & Preview */}
             <section id="task-column" className="lg:sticky lg:top-20 space-y-6">
               <div className="bg-white rounded-lg border border-linkedin-border overflow-hidden shadow-sm flex flex-col border-t-2 border-t-linkedin-blue w-full">
