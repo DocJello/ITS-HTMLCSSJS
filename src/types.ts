@@ -71,6 +71,18 @@ export interface Module {
   submodules: Submodule[];
 }
 
+export interface Assessment {
+  _id?: string;
+  id?: string;
+  title: string;
+  type: 'formative' | 'summative';
+  moduleId: string;
+  topic: 'HTML' | 'CSS' | 'JavaScript';
+  questionIds: ExerciseEntry[];
+  authorId?: any;
+  createdAt?: string;
+}
+
 export interface ExerciseEntry {
   id: string;
   topic: 'HTML' | 'CSS' | 'JavaScript';
