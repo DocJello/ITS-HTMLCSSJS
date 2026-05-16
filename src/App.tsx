@@ -44,8 +44,14 @@ function Login({ onLogin }: { onLogin: (user: any, token: string) => void }) {
   const [sectionId, setSectionId] = useState("");
   const [sections, setSections] = useState<any[]>([]);
   const [error, setError] = useState("");
+  const [backendStatus, setBackendStatus] = useState<any>(null);
 
   useEffect(() => {
+    fetch("/api/health")
+      .then(res => res.json())
+      .then(data => setBackendStatus(data))
+      .catch(err => console.error("Health check failed", err));
+
     fetch("/api/sections")
       .then(res => {
         if (!res.ok) throw new Error("Failed to fetch sections");
@@ -94,7 +100,17 @@ function Login({ onLogin }: { onLogin: (user: any, token: string) => void }) {
           <div className="bg-linkedin-blue p-2 rounded-xl shadow-lg">
             <BrainCircuit className="text-white" size={32} />
           </div>
-          <h1 className="text-3xl font-black text-linkedin-blue tracking-tighter">FIITS</h1>
+          <div className="text-center">
+            <h1 className="text-3xl font-black text-linkedin-blue tracking-tighter">FIITS</h1>
+            {backendStatus && (
+              <div className="flex items-center justify-center gap-1 mt-1">
+                <div className={`w-2 h-2 rounded-full ${backendStatus.database === 'connected' ? 'bg-green-500' : 'bg-orange-500'}`} />
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  API: {backendStatus.database === 'connected' ? 'Online' : 'DB Disconnected'}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
