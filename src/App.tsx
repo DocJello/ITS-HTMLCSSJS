@@ -32,8 +32,106 @@ import {
   User, 
   UserRole, 
   Section, 
-  DifficultyLevel 
+  DifficultyLevel,
+  Module,
+  Submodule
 } from "./types";
+
+const MODULES: Module[] = [
+  {
+    id: "m1",
+    title: "HTML Introduction",
+    topic: "HTML",
+    submodules: [
+      { 
+        id: "m1-s1", 
+        title: "Introduction", 
+        content: "HTML (HyperText Markup Language) is the most basic building block of the Web. It defines the meaning and structure of web content.",
+        videos: ["https://www.youtube.com/embed/qz0aGYrrlhU", "https://www.youtube.com/embed/ok-plXXHlWw"],
+        link: "https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web/HTML_basics"
+      },
+      { 
+        id: "m1-s2", 
+        title: "Getting Started", 
+        content: "To get started with HTML, you only need a text editor and a web browser. Every HTML file must start with a <!DOCTYPE html> declaration.",
+        videos: ["https://www.youtube.com/embed/88PLf4-tpxU", "https://www.youtube.com/embed/vM-Z8Sj9i-g"],
+        link: "https://www.w3schools.com/html/html_intro.asp"
+      }
+    ]
+  },
+  {
+    id: "m2",
+    title: "HTML Structure",
+    topic: "HTML",
+    submodules: [
+      { id: "m2-s1", title: "Carriage returns and thematic break lines", content: "The <br> tag inserts a single line break. The <hr> tag defines a thematic break in an HTML page.", videos: [], link: "" },
+      { id: "m2-s2", title: "Commenting", content: "HTML comments are not displayed by the browser, but they can help document your HTML source code.", videos: [], link: "" },
+      { id: "m2-s3", title: "Special characters", content: "Special characters in HTML are represented using character entities like &nbsp; for space or &lt; for less than.", videos: [], link: "" }
+    ]
+  },
+  {
+    id: "m3",
+    title: "HTML Connectivity",
+    topic: "HTML",
+    submodules: [
+      { id: "m3-s1", title: "Hyperlinks", content: "HTML links are hyperlinks. You can click on a link and jump to another document.", videos: [], link: "" },
+      { id: "m3-s2", title: "HTML elements (and their attributes)", content: "An HTML element is defined by a start tag, some content, and an end tag. Attributes provide additional information about elements.", videos: [], link: "" },
+      { id: "m3-s3", title: "Browser feature detection", content: "Feature detection involves testing whether a browser supports a certain block of code, and running different code if it doesn't.", videos: [], link: "" }
+    ]
+  },
+  {
+    id: "m4",
+    title: "CSS Fundamentals",
+    topic: "CSS",
+    submodules: [
+      { id: "m4-s1", title: "Introduction", content: "CSS is the language we use to style an HTML document. CSS describes how HTML elements should be displayed.", videos: [], link: "" }
+    ]
+  },
+  {
+    id: "m5",
+    title: "CSS Selectors",
+    topic: "CSS",
+    submodules: [
+      { id: "m5-s1", title: "Selectors", content: "CSS selectors are used to 'find' (or select) the HTML elements you want to style.", videos: [], link: "" }
+    ]
+  },
+  {
+    id: "m6",
+    title: "CSS Advanced",
+    topic: "CSS",
+    submodules: [
+      { id: "m6-s1", title: "Hints and further information", content: "Deep dive into cascading, specificity, and the inheritance of styles.", videos: [], link: "" }
+    ]
+  },
+  {
+    id: "m7",
+    title: "JavaScript Basics",
+    topic: "JavaScript",
+    submodules: [
+      { id: "m7-s1", title: "Introduction", content: "JavaScript is the world's most popular programming language. It is the language of the Web.", videos: [], link: "" },
+      { id: "m7-s2", title: "Variables", content: "Variables are containers for storing data (storing data values).", videos: [], link: "" },
+      { id: "m7-s3", title: "Statements", content: "A computer program is a list of 'instructions' to be 'executed' by a computer. In a programming language, these programming instructions are called statements.", videos: [], link: "" }
+    ]
+  },
+  {
+    id: "m8",
+    title: "JavaScript Logic",
+    topic: "JavaScript",
+    submodules: [
+      { id: "m8-s1", title: "Functions", content: "A JavaScript function is a block of code designed to perform a particular task.", videos: [], link: "" },
+      { id: "m8-s2", title: "Event handling", content: "HTML events are 'things' that happen to HTML elements. When JavaScript is used in HTML pages, JavaScript can 'react' on these events.", videos: [], link: "" }
+    ]
+  },
+  {
+    id: "m9",
+    title: "JavaScript DOM",
+    topic: "JavaScript",
+    submodules: [
+      { id: "m9-s1", title: "The Document Object Model (DOM)", content: "With the HTML DOM, JavaScript can access and change all the elements of an HTML document.", videos: [], link: "" },
+      { id: "m9-s2", title: "Miscellaneous", content: "Advanced JS concepts like closures, promises, and async/await.", videos: [], link: "" }
+    ]
+  }
+];
 
 function Login({ onLogin }: { onLogin: (user: any, token: string) => void }) {
   const [email, setEmail] = useState("");
@@ -485,7 +583,7 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
           </div>
         </aside>
 
-        <section className="lg:col-span-3 space-y-6">
+        <section className="lg:col-span-2 space-y-6">
           {teacherView === "all_sections" ? (
              <div className="bg-white p-8 rounded-xl border border-linkedin-border shadow-sm">
                <h2 className="text-xl font-black mb-6 flex items-center gap-3">
@@ -519,7 +617,7 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
              <div className="bg-white p-8 rounded-xl border border-linkedin-border shadow-sm">
                <h2 className="text-xl font-black mb-6 flex items-center gap-3">
                  <Code2 className="text-linkedin-blue" />
-                 Question Bank ({allQuestions.length} items)
+                 Question Bank <span className="text-linkedin-text-muted font-normal text-xs">({allQuestions.length} total curated items)</span>
                </h2>
                <div className="grid grid-cols-1 gap-4 max-h-[600px] overflow-y-auto pr-2">
                  {allQuestions.map((q: any, i: number) => (
@@ -531,9 +629,8 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
                             {q.difficulty}
                           </span>
                         </div>
-                        <span className="text-[10px] font-bold text-linkedin-text-muted flex items-center gap-1">
-                          <UserIcon size={10} /> 
-                          {q.authorId?.role === 'Admin' || !q.authorId ? 'System Admin' : q.authorId.name}
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${!q.authorId || q.authorId === 'admin' ? 'bg-gray-100 text-gray-500 border-gray-200' : 'bg-blue-50 text-linkedin-blue border-blue-100'}`}>
+                          {!q.authorId || q.authorId === 'admin' ? 'ADMIN' : (typeof q.authorId === 'object' ? q.authorId.name : 'TEACHER')}
                         </span>
                       </div>
                       <h4 className="font-black text-sm">{q.title}</h4>
@@ -596,7 +693,304 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
             </div>
           )}
         </section>
+
+        {/* Right Side Stats Container */}
+        <aside className="space-y-6">
+          <div className="bg-white p-6 rounded-xl border border-linkedin-border shadow-sm border-t-4 border-t-linkedin-blue">
+            <h3 className="font-black text-xs uppercase tracking-widest mb-4">My Contributor Stats</h3>
+            <div className="space-y-6">
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[10px] font-bold text-linkedin-text-muted uppercase">Authored Questions</span>
+                  <span className="text-sm font-black text-linkedin-blue">
+                    {allQuestions.filter(q => q.authorId?._id === user.id || q.authorId === user.id).length}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-100 h-1 rounded-full overflow-hidden">
+                  <div 
+                    className="bg-linkedin-blue h-full transition-all duration-1000" 
+                    style={{ width: `${Math.min(100, (allQuestions.filter(q => q.authorId?._id === user.id || q.authorId === user.id).length / 20) * 100)}%` }}
+                  />
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[10px] font-bold text-linkedin-text-muted uppercase">Section Reach</span>
+                  <span className="text-sm font-black text-linkedin-blue">
+                    {sections.filter(s => s.teacherId?._id === user.id || s.teacherId === user.id).length}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-100 h-1 rounded-full overflow-hidden">
+                  <div 
+                    className="bg-linkedin-blue h-full transition-all duration-1000" 
+                    style={{ width: `${Math.min(100, (sections.filter(s => s.teacherId?._id === user.id || s.teacherId === user.id).length / 10) * 100)}%` }}
+                  />
+                </div>
+              </div>
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 text-center">
+                <p className="text-[9px] font-black text-linkedin-blue uppercase tracking-widest mb-1">Total Verified Students</p>
+                <p className="text-2xl font-black text-linkedin-blue">
+                   {analytics?.students?.length || 0}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl border border-linkedin-border shadow-sm">
+             <div className="flex items-center gap-2 mb-4">
+                <Sparkles size={16} className="text-yellow-500" />
+                <h3 className="font-black text-xs uppercase tracking-widest">Pedagogical Insights</h3>
+             </div>
+             <p className="text-[10px] leading-relaxed text-linkedin-text-muted">
+               Your authored questions are contributing to the global bank accessible by all students in the FIITS network.
+             </p>
+          </div>
+        </aside>
       </div>
+    </div>
+  );
+}
+
+function StudentModules({ user, token, onStartAssessment }: { user: User; token: string; onStartAssessment: (topic: string, type: 'formative' | 'summative', subId: string) => void }) {
+  const [selectedSubmodule, setSelectedSubmodule] = useState<Submodule | null>(null);
+  const [progress, setProgress] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/progress/me", { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => res.json())
+      .then(data => {
+        setProgress(data || []);
+        setLoading(false);
+      });
+  }, [token]);
+
+  const isCompleted = (submoduleId: string) => progress.some(p => p.exerciseId === submoduleId);
+  const isModuleAssessPassed = (moduleId: string, type: string) => progress.some(p => p.exerciseId === `${moduleId}-${type}` && (p.label === 'APPLY' || p.label === 'Success'));
+
+  const canAccessSubmodule = (moduleIdx: number, subIdx: number) => {
+    if (moduleIdx === 0 && subIdx === 0) return true;
+    
+    let prevModuleIdx = moduleIdx;
+    let prevSubIdx = subIdx - 1;
+    
+    if (prevSubIdx < 0) {
+      // Check if previous module's summative assessment is passed
+      return isModuleAssessPassed(MODULES[moduleIdx - 1].id, 'summative');
+    }
+    
+    return isCompleted(MODULES[prevModuleIdx].submodules[prevSubIdx].id);
+  };
+
+  const markViewed = async (subId: string) => {
+    if (isCompleted(subId)) return;
+    try {
+      await fetch("/api/adaptive/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({
+          reflection: "Module content viewed.",
+          attempts: [{ isCorrect: true, timestamp: new Date().toISOString() }],
+          feedbackLogs: [],
+          exerciseId: subId
+        })
+      });
+      // Refresh progress
+      const res = await fetch("/api/progress/me", { headers: { Authorization: `Bearer ${token}` } });
+      setProgress(await res.json());
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  if (loading) return <div className="p-20 text-center font-bold text-gray-400">Loading modules...</div>;
+
+  return (
+    <div className="max-w-[1128px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
+      <div className="space-y-6">
+        {selectedSubmodule ? (
+          <div className="bg-white rounded-xl border border-linkedin-border shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-linkedin-border flex items-center justify-between">
+              <button 
+                onClick={() => setSelectedSubmodule(null)}
+                className="text-xs font-bold text-linkedin-blue flex items-center gap-2 hover:underline"
+              >
+                <ArrowRight className="rotate-180" size={14} /> Back to Modules
+              </button>
+              <h2 className="text-sm font-black uppercase tracking-widest">{selectedSubmodule.title}</h2>
+            </div>
+            <div className="p-8 space-y-8">
+              <div className="prose prose-sm max-w-none">
+                <h3 className="text-xl font-bold mb-4">Topic Guide</h3>
+                <p className="text-gray-600 leading-relaxed">{selectedSubmodule.content}</p>
+              </div>
+
+              {selectedSubmodule.videos.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-linkedin-text-muted">Supplementary Tutorials</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {selectedSubmodule.videos.map((v, i) => (
+                      <div key={i} className="aspect-video bg-black rounded-lg overflow-hidden border border-linkedin-border">
+                        <iframe 
+                          width="100%" 
+                          height="100%" 
+                          src={v} 
+                          title="YouTube video player" 
+                          frameBorder="0" 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                          allowFullScreen
+                        ></iframe>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedSubmodule.link && (
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-100 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Info className="text-linkedin-blue" size={20} />
+                    <div>
+                      <p className="text-xs font-bold text-linkedin-text">Curated Web Resource</p>
+                      <p className="text-[10px] text-linkedin-text-muted">Detailed documentation for this module</p>
+                    </div>
+                  </div>
+                  <a href={selectedSubmodule.link} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-white border border-linkedin-blue text-[10px] font-bold rounded-full hover:bg-linkedin-blue hover:text-white transition-all">
+                    View Resource
+                  </a>
+                </div>
+              )}
+
+              <div className="pt-8 border-t border-linkedin-border">
+                 <button 
+                  onClick={() => { markViewed(selectedSubmodule.id); setSelectedSubmodule(null); }}
+                  className="w-full bg-linkedin-blue text-white py-3 rounded-lg font-bold text-sm shadow-md"
+                 >
+                   Complete & Move to Next
+                 </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="bg-white p-6 rounded-xl border border-linkedin-border shadow-sm flex items-center gap-4">
+               <div className="p-3 bg-linkedin-blue rounded-xl text-white">
+                  <GraduationCap size={24} />
+               </div>
+               <div>
+                  <h2 className="text-xl font-black tracking-tight uppercase">Modules Overview</h2>
+                  <p className="text-xs text-linkedin-text-muted font-bold">Access submodules sequentially to reach module assessments</p>
+               </div>
+            </div>
+
+            {MODULES.map((m, mIdx) => {
+              const allSubsViewed = m.submodules.every(s => isCompleted(s.id));
+              const moduleUnlocked = mIdx === 0 || isModuleAssessPassed(MODULES[mIdx-1].id, 'summative');
+
+              return (
+                <div key={m.id} className={`bg-white rounded-xl border border-linkedin-border shadow-sm overflow-hidden ${!moduleUnlocked ? 'opacity-50 grayscale pointer-events-none' : ''}`}>
+                  <div className="px-6 py-4 border-b border-linkedin-border bg-gray-50 flex items-center justify-between">
+                    <h3 className="text-xs font-black uppercase tracking-widest text-linkedin-text flex items-center gap-2">
+                      <span className="w-6 h-6 bg-linkedin-blue text-white rounded-full flex items-center justify-center text-[10px] font-black">{mIdx + 1}</span>
+                      {m.title}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      {isModuleAssessPassed(m.id, 'summative') && <span className="text-[9px] font-black bg-green-50 text-green-600 px-2 py-0.5 rounded border border-green-100 uppercase">Passed</span>}
+                      <span className="text-[10px] font-bold text-linkedin-text-muted">{m.topic}</span>
+                    </div>
+                  </div>
+                  <div className="divide-y divide-gray-100">
+                    {m.submodules.map((s, sIdx) => {
+                      const accessible = canAccessSubmodule(mIdx, sIdx);
+                      const completed = isCompleted(s.id);
+                      return (
+                        <div key={s.id} className={`p-4 flex items-center justify-between transition-colors ${accessible ? 'hover:bg-blue-50/30' : 'opacity-60'}`}>
+                          <div className="flex items-center gap-4">
+                            <div className={`p-2 rounded-lg ${completed ? 'bg-green-100 text-green-600' : accessible ? 'bg-blue-50 text-linkedin-blue' : 'bg-gray-100 text-gray-400'}`}>
+                              {completed ? <CheckCircle2 size={16} /> : accessible ? <BookOpen size={16} /> : <Lock size={16} />}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-linkedin-text">{s.title}</p>
+                              <p className="text-[10px] text-linkedin-text-muted">Part {sIdx + 1}</p>
+                            </div>
+                          </div>
+                          <button 
+                            disabled={!accessible}
+                            onClick={() => setSelectedSubmodule(s)}
+                            className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${
+                              accessible 
+                                ? 'border-linkedin-blue text-linkedin-blue hover:bg-linkedin-blue hover:text-white' 
+                                : 'border-gray-200 text-gray-400 cursor-not-allowed'
+                            }`}
+                          >
+                            {completed ? 'Review' : 'Start'}
+                          </button>
+                        </div>
+                      );
+                    })}
+
+                    {/* Module Assessments Footer */}
+                    <div className={`px-6 py-4 bg-gray-50 flex gap-4 transition-all ${allSubsViewed ? 'opacity-100' : 'opacity-40 grayscale pointer-events-none'}`}>
+                      <button 
+                        onClick={() => onStartAssessment(m.topic, 'formative', m.id)}
+                        className={`flex-1 py-2 rounded-lg border font-black text-[10px] uppercase tracking-widest transition-all ${isModuleAssessPassed(m.id, 'formative') ? 'bg-green-50 border-green-200 text-green-600' : 'bg-white border-linkedin-border text-linkedin-text hover:border-linkedin-blue'}`}
+                      >
+                        {isModuleAssessPassed(m.id, 'formative') ? 'Formative Passed' : 'Start Formative (Pre-test)'}
+                      </button>
+                      <button 
+                        onClick={() => onStartAssessment(m.topic, 'summative', m.id)}
+                        className={`flex-1 py-2 rounded-lg border font-black text-[10px] uppercase tracking-widest transition-all ${isModuleAssessPassed(m.id, 'summative') ? 'bg-green-50 border-green-200 text-green-600' : 'bg-linkedin-blue border-linkedin-blue text-white hover:bg-blue-800'}`}
+                      >
+                        {isModuleAssessPassed(m.id, 'summative') ? 'Summative Passed' : 'Start Summative (Post-test)'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <aside className="space-y-6">
+        <div className="bg-white p-6 rounded-xl border border-linkedin-border shadow-sm text-center">
+           <div className="w-20 h-20 bg-linkedin-blue/10 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-linkedin-blue/20">
+              <Sparkles className="text-linkedin-blue" size={32} />
+           </div>
+           <h4 className="font-black text-sm uppercase tracking-tight">Your Progress</h4>
+           <div className="mt-4 space-y-4">
+              <div>
+                <div className="flex justify-between text-[10px] font-bold mb-1">
+                  <span>COMPLETION</span>
+                  <span>{Math.round((progress.length / MODULES.reduce((acc, m) => acc + m.submodules.length, 0)) * 100)}%</span>
+                </div>
+                <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                   <div 
+                    className="bg-linkedin-blue h-full transition-all duration-1000" 
+                    style={{ width: `${(progress.length / MODULES.reduce((acc, m) => acc + m.submodules.length, 0)) * 100}%` }}
+                   />
+                </div>
+              </div>
+              <p className="text-[10px] text-linkedin-text-muted font-medium italic">
+                "Small steps lead to mastery. Keep pushing your boundaries!"
+              </p>
+           </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl border border-linkedin-border shadow-sm">
+           <h4 className="font-black text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+             <History size={14} /> Recent Footprints
+           </h4>
+           <div className="space-y-3">
+              {progress.slice(-3).reverse().map((p, i) => (
+                <div key={i} className="flex items-center gap-3">
+                   <div className="w-1.5 h-1.5 rounded-full bg-linkedin-blue" />
+                   <p className="text-[10px] font-bold text-linkedin-text truncate capitalize">{p.exerciseId.replace(/-/g, ' ')}</p>
+                </div>
+              ))}
+           </div>
+        </div>
+      </aside>
     </div>
   );
 }
@@ -774,7 +1168,8 @@ export default function App() {
   const [reflection, setReflection] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<DetectionResult | null>(null);
-  const [appState, setAppState] = useState<"solving" | "reflecting" | "complete" | "teacher_dashboard" | "admin_dashboard">("solving");
+  const [appState, setAppState] = useState<"solving" | "reflecting" | "complete" | "teacher_dashboard" | "admin_dashboard" | "modules">("modules");
+  const [assessmentMode, setAssessmentMode] = useState<{ topic: string, type: 'formative' | 'summative', id: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showHint, setShowHint] = useState(false);
   
@@ -865,6 +1260,31 @@ export default function App() {
     }
   };
 
+  const startAssessment = async (topic: string, type: 'formative' | 'summative', subId: string) => {
+    try {
+      const res = await fetch("/api/exercises");
+      const allEx = await res.json();
+      const filtered = allEx.filter((ex: any) => {
+        const topicMatch = ex.topic.toLowerCase() === topic.toLowerCase();
+        if (type === 'formative') return topicMatch && ex.difficulty === DifficultyLevel.EASY;
+        return topicMatch && (ex.difficulty === DifficultyLevel.MEDIUM || ex.difficulty === DifficultyLevel.HARD);
+      });
+
+      if (filtered.length === 0) {
+        alert("No questions found for this assessment level in the bank.");
+        return;
+      }
+
+      setExercises(filtered);
+      setCurrentIdx(0);
+      setCode(filtered[0].template);
+      setAssessmentMode({ topic, type, id: subId });
+      setAppState("solving");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleAssessment = useCallback(() => {
     if (!currentExercise) return;
     
@@ -910,7 +1330,8 @@ export default function App() {
             reflection: "User is struggling with multiple incorrect attempts.",
             attempts: updatedAttempts,
             feedbackLogs,
-            exerciseId: (currentExercise as any)?._id || currentExercise?.id
+            exerciseId: (currentExercise as any)?._id || currentExercise?.id,
+            assessmentType: assessmentMode?.type || 'standard'
           })
         })
         .then(res => res.json())
@@ -918,7 +1339,7 @@ export default function App() {
         .finally(() => setIsSubmitting(false));
       }
     }
-  }, [code, currentExercise, attempts, feedbackLogs, token]);
+  }, [code, currentExercise, attempts, feedbackLogs, token, assessmentMode]);
 
   const handleReflectionSubmit = async () => {
     if (!reflection.trim()) return;
@@ -934,13 +1355,13 @@ export default function App() {
           reflection,
           attempts,
           feedbackLogs,
-          exerciseId: (currentExercise as any)?._id || currentExercise?.id
+          exerciseId: assessmentMode ? `${assessmentMode.id}-${assessmentMode.type}` : ((currentExercise as any)?._id || currentExercise?.id),
+          assessmentType: assessmentMode?.type || 'standard'
         })
       });
       const data = await res.json();
       setFeedback(data);
       setAppState("complete");
-      // Auto-transition to next after a delay if mentor says it's okay or just always load next
       if (data.label === 'APPLY' || data.suggestedAction === 'next') {
         setTimeout(handleNext, 3000);
       }
@@ -965,6 +1386,11 @@ export default function App() {
       setShowHint(false);
     } else {
       setAppState("complete");
+      if (assessmentMode) {
+        alert(`${assessmentMode.type} assessment completed!`);
+        setAssessmentMode(null);
+        setAppState("modules");
+      }
     }
   };
 
@@ -998,6 +1424,15 @@ export default function App() {
           <div className="hidden md:flex items-center gap-2">
             {user.role === UserRole.STUDENT && (
               <button 
+                onClick={() => setAppState("modules")} 
+                className={`flex flex-col items-center justify-center h-14 w-20 transition-all ${appState === 'modules' ? 'border-b-2 border-linkedin-blue text-linkedin-blue' : 'text-linkedin-text-muted hover:text-linkedin-text'}`}
+              >
+                <BookOpen size={18} />
+                <span className="text-[10px] mt-1 font-semibold uppercase tracking-wider">Modules</span>
+              </button>
+            )}
+            {user.role === UserRole.STUDENT && (
+              <button 
                 onClick={() => setAppState("solving")} 
                 className={`flex flex-col items-center justify-center h-14 w-20 transition-all ${appState === 'solving' ? 'border-b-2 border-linkedin-blue text-linkedin-blue' : 'text-linkedin-text-muted hover:text-linkedin-text'}`}
               >
@@ -1029,7 +1464,9 @@ export default function App() {
 
       {/* Main Content */}
       <main className="w-full px-4 lg:px-12 pb-12 pt-6 overflow-x-hidden">
-        {appState === "teacher_dashboard" ? (
+        {appState === "modules" ? (
+          <StudentModules user={user} token={token} onStartAssessment={startAssessment} />
+        ) : appState === "teacher_dashboard" ? (
           <TeacherDashboard user={user} token={token} />
         ) : appState === "admin_dashboard" ? (
           <AdminDashboard user={user} token={token} />
