@@ -67,10 +67,23 @@ const mongoUri = process.env.MONGODB_URI;
 if (mongoUri) {
   mongoose.connect(mongoUri)
     .then(() => console.log("Connected to MongoDB Atlas via Mongoose"))
-    .catch(err => console.error("MongoDB connection error:", err));
+    .catch(err => {
+      console.error("MongoDB connection error:", err);
+      // In serverless, we might want to know if it failed
+    });
 } else {
   console.warn("MONGODB_URI not defined. File persistence disabled.");
 }
+
+const checkDbConnection = (req: any, res: any, next: any) => {
+  if (mongoose.connection.readyState !== 1) {
+    if (!process.env.MONGODB_URI) {
+      return res.status(500).json({ error: "Database configuration error (MONGODB_URI missing). Please check your Vercel Environment Variables." });
+    }
+    return res.status(503).json({ error: "Database connecting... please try again in a moment." });
+  }
+  next();
+};
 
 // --- AI Client ---
 let groq: Groq | null = null;
@@ -101,13 +114,14 @@ const authenticateToken = (req: any, res: any, next: any) => {
 app.get("/api/health", (req, res) => {
   res.json({ 
     status: "ok", 
-    database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    database: mongoose.connection.readyState === 1 ? "connected" : "connecting/disconnected",
+    dbState: mongoose.connection.readyState,
     uptime: process.uptime()
   });
 });
 
 // Auth Routes
-app.post("/api/auth/register", async (req, res) => {
+app.post("/api/auth/register", checkDbConnection, async (req, res) => {
   try {
     const { email, password, name, role, sectionId } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -132,7 +146,7 @@ app.post("/api/auth/register", async (req, res) => {
   }
 });
 
-app.post("/api/auth/login", async (req, res) => {
+app.post("/api/auth/login", checkDbConnection, async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -278,6 +292,11 @@ app.post("/api/adaptive/analyze", authenticateToken, async (req: any, res) => {
   }
 });
 
+// Catch-all for /api/ routes to ensure JSON response
+app.all("/api/*", (req, res) => {
+  res.status(404).json({ error: `Route ${req.method} ${req.url} not found on this server.` });
+});
+
 // Helper for detection
 function detectDisregard(attempts: any[], feedbackLogs: any[]) {
   if (attempts.length < 2) return { label: DisregardLabel.IDLE, reason: "Initial attempt" };
@@ -307,15 +326,27 @@ const SEED_QUESTIONS = [
 ];
 
 // --- Vite Middleware ---
-async function startServer() {
+export async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: "spa" });
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get("*", (req, res) => res.sendFile(path.join(distPath, "index.html")));
+    // SPA fallback: ONLY if not on Vercel (Vercel uses vercel.json)
+    if (!process.env.VERCEL) {
+      app.get("*", (req, res) => res.sendFile(path.join(distPath, "index.html")));
+    }
   }
-  app.listen(PORT, "0.0.0.0", () => console.log(`FIITS server running on port ${PORT}`));
+  
+  if (!process.env.VERCEL) {
+    app.listen(PORT, "0.0.0.0", () => console.log(`FIITS server running on port ${PORT}`));
+  }
 }
-startServer();
+
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export { app };
+export default app;
