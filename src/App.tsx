@@ -783,7 +783,7 @@ export default function App() {
   return (
     <div className="min-h-screen font-sans bg-linkedin-bg text-linkedin-text">
       {/* Top Navigation */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-linkedin-border h-14 flex items-center shadow-sm px-4 lg:px-8">
+      <nav className="sticky top-0 z-50 bg-white border-b border-linkedin-border h-14 flex items-center shadow-sm px-4 lg:px-12">
         <div className="w-full flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-linkedin-blue p-1.5 rounded-md shadow-sm">
@@ -824,13 +824,19 @@ export default function App() {
       </nav>
 
       {/* Main Content */}
-      <main className="w-full px-4 lg:px-8 pb-12 pt-6 overflow-x-hidden">
+      <main className="w-full px-4 lg:px-12 pb-12 pt-6 overflow-x-hidden">
         {appState === "teacher_dashboard" ? (
           <TeacherDashboard user={user} token={token} />
         ) : appState === "admin_dashboard" ? (
           <AdminDashboard user={user} token={token} />
+        ) : !currentExercise ? (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] bg-white rounded-xl border border-linkedin-border shadow-sm">
+            <RefreshCcw className="animate-spin text-linkedin-blue mb-4" size={48} />
+            <p className="text-lg font-bold text-gray-400 tracking-tight">Syncing exercises with mentor bank...</p>
+            <p className="text-xs text-gray-400 mt-2">If this takes too long, ensure exercises are seeded in the database.</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-[3fr_4fr_3fr] gap-6 items-start w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-[30%_40%_30%] gap-6 items-start w-full max-w-none mx-auto">
             {/* Left Column: Task & Preview */}
             <section id="task-column" className="lg:sticky lg:top-20 space-y-6">
               <div className="bg-white rounded-lg border border-linkedin-border overflow-hidden shadow-sm flex flex-col border-t-2 border-t-linkedin-blue w-full">
@@ -844,7 +850,9 @@ export default function App() {
                 </div>
                 <div className="p-6 flex-1 flex flex-col">
                   <div className="mb-6 shrink-0">
-                    <p className="text-sm font-bold text-linkedin-blue uppercase tracking-tighter mb-1">{currentExercise?.topic} Fundamentals • Level {currentExercise?.level}</p>
+                    <p className="text-sm font-bold text-linkedin-blue uppercase tracking-tighter mb-1">
+                      {currentExercise?.topic || "HTML"} Fundamentals • Level {currentExercise?.level || 1}
+                    </p>
                     <h2 className="text-sm font-bold text-linkedin-text uppercase tracking-widest leading-tight mb-4">{currentExercise?.title}</h2>
                     
                     <div className="bg-blue-50/20 p-5 rounded-xl border border-blue-100/50 mb-6">
@@ -915,7 +923,7 @@ export default function App() {
                     </div>
                     <Editor
                       height="100%"
-                      language={currentExercise?.topic.toLowerCase() === 'javascript' ? 'javascript' : 'html'}
+                      language={currentExercise?.topic?.toLowerCase() === 'javascript' ? 'javascript' : 'html'}
                       theme="vs-dark"
                       value={code}
                       onChange={(val) => setCode(val || "")}
