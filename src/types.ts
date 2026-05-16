@@ -56,6 +56,21 @@ export interface Section {
   teacherId: string;
 }
 
+export interface Submodule {
+  id: string;
+  title: string;
+  content: string;
+  videos: string[];
+  link: string;
+}
+
+export interface Module {
+  id: string;
+  title: string;
+  topic: 'HTML' | 'CSS' | 'JavaScript';
+  submodules: Submodule[];
+}
+
 export interface ExerciseEntry {
   id: string;
   topic: 'HTML' | 'CSS' | 'JavaScript';
