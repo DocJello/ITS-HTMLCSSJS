@@ -1,0 +1,13 @@
+{
+  "name": "FIITS",
+  "description": "Feed-Forward Intelligent Tutoring System (FIITS) - An adaptive learning platform for web development with role-based features for students, teachers, and admins.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "Feedback Disregard Detection",
+    "Root Cause Analysis",
+    "Adaptive Pedagogical Hinting",
+    "MongoDB Progress Persistence",
+    "Role-Based Access Control",
+    "Teacher & Admin Dashboards"
+  ]
+}

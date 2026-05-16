@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Fira Sans", Ubuntu, Oxygen, "Oxygen Sans", Cantarell, "Droid Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Lucida Grande", Helvetica, Arial, sans-serif;
+  --color-linkedin-blue: #0a66c2;
+  --color-linkedin-bg: #f3f2ef;
+  --color-linkedin-border: #e0e0e0;
+  --color-linkedin-text: rgba(0, 0, 0, 0.9);
+  --color-linkedin-text-muted: rgba(0, 0, 0, 0.6);
+}
+
+@layer base {
+  body {
+    @apply bg-linkedin-bg text-linkedin-text;
+  }
+}
