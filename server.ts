@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import Groq from "groq-sdk";
 import dotenv from "dotenv";
-import { DisregardLabel, UserRole, DifficultyLevel } from "./src/types";
+import { DisregardLabel, UserRole, DifficultyLevel } from "./src/types.js";
 
 dotenv.config();
 
