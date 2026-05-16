@@ -263,14 +263,20 @@ app.delete("/api/sections/:id", authenticateToken, async (req: any, res) => {
 
 // Questions
 app.get("/api/exercises", async (req, res) => {
-  const questions = await Question.find();
-  // If no questions in DB, return default ones (optional migration)
-  if (questions.length === 0) {
-    // Seed logic could go here or just return a static list for now to avoid empty UI
-    // For this POC, I'll return the hardcoded list if DB is empty
-    return res.json(SEED_QUESTIONS);
+  try {
+    const questions = await Question.find();
+    console.log(`Fetched ${questions.length} questions from DB`);
+    
+    // If no questions in DB, return default ones (optional migration)
+    if (questions.length === 0) {
+      console.log("No questions found in database, returning SEED_QUESTIONS");
+      return res.json(SEED_QUESTIONS);
+    }
+    res.json(questions);
+  } catch (err: any) {
+    console.error("Error fetching exercises:", err);
+    res.status(500).json({ error: "Failed to fetch exercises: " + err.message });
   }
-  res.json(questions);
 });
 
 app.post("/api/exercises", authenticateToken, async (req: any, res) => {
@@ -364,13 +370,26 @@ const SEED_QUESTIONS = [
     topic: "HTML",
     level: 1,
     difficulty: DifficultyLevel.EASY,
-    title: "Document Headers",
-    description: "Create a main heading (H1) for 'Portfolio' and a sub-heading (H2) for 'About Me'.",
-    template: "<!-- Write your headers here -->",
+    title: "Portfolio Header Structure",
+    description: "Welcome to your first task! You need to establish the basic heading structure for a portfolio page. Create a main heading (H1) with the text 'Portfolio' and a secondary heading (H2) for 'About Me'. This provides the semantic hierarchy needed for screen readers and search engines.",
+    template: "<!-- Write your <h1> and <h2> headers here -->\n",
     solution: "<h1>Portfolio</h1>\n<h2>About Me</h2>",
-    hint: "Use <h1> and <h2> tags for primary and secondary headings.",
+    hint: "Use the <h1> tag for your primary title and <h2> for the section subheading.",
     expectedOutput: "A main heading (H1) 'Portfolio' and a sub-heading (H2) 'About Me'.",
-    expectedOutputHtml: "<h1>Portfolio</h1>\n<h2>About Me</h2>"
+    expectedOutputHtml: "<div class='text-center border-b pb-4 mb-4'><h1 class='text-3xl font-black text-gray-900 mb-2'>Portfolio</h1><h2 class='text-xl font-bold text-blue-600'>About Me</h2></div>"
+  },
+  {
+    id: "html-2",
+    topic: "HTML",
+    level: 1,
+    difficulty: DifficultyLevel.EASY,
+    title: "Lists and Links",
+    description: "Every portfolio needs links! Create an unordered list (<ul>) with two list items (<li>). Each item should contain an anchor tag (<a>). Link the first one to '#' with text 'Projects' and the second to '#' with text 'Contact'.",
+    template: "<ul>\n  <!-- Add your list items and links here -->\n</ul>",
+    solution: "<ul>\n  <li><a href=\"#\">Projects</a></li>\n  <li><a href=\"#\">Contact</a></li>\n</ul>",
+    hint: "Nest <a> tags inside <li> tags, and use the <ul> container.",
+    expectedOutput: "An unordered list with two links: Projects and Contact.",
+    expectedOutputHtml: "<ul class='flex gap-4 justify-center py-4 text-blue-500 font-bold'><li><a href='#'>Projects</a></li><li><a href='#'>Contact</a></li></ul>"
   }
 ];
 
