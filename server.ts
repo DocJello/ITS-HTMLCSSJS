@@ -88,24 +88,9 @@ async function connectToDatabase() {
   }
 }
 
-// Initial connection and seeding for non-vercel
+// Initial connection
 if (!process.env.VERCEL && process.env.MONGODB_URI) {
-  connectToDatabase().then(async () => {
-    // Seed Admin
-    const adminEmail = "admin";
-    const existingAdmin = await User.findOne({ email: adminEmail });
-    if (!existingAdmin) {
-      const hashedAdminPassword = await bcrypt.hash("admin123", 10);
-      const admin = new User({
-        email: adminEmail,
-        password: hashedAdminPassword,
-        name: "System Admin",
-        role: UserRole.ADMIN
-      });
-      await admin.save();
-      console.log("Admin account seeded: admin / admin123");
-    }
-  });
+  connectToDatabase();
 }
 
 const checkDbConnection = async (req: any, res: any, next: any) => {
