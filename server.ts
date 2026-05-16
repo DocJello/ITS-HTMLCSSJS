@@ -1,7 +1,6 @@
 import express from "express";
 import path from "path";
 import cors from "cors";
-import { createServer as createViteServer } from "vite";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
@@ -64,26 +63,56 @@ const Progress = mongoose.model("Progress", progressSchema);
 
 // --- MongoDB Connection ---
 const mongoUri = process.env.MONGODB_URI;
-if (mongoUri) {
-  mongoose.connect(mongoUri)
-    .then(() => console.log("Connected to MongoDB Atlas via Mongoose"))
-    .catch(err => {
-      console.error("MongoDB connection error:", err);
-      // In serverless, we might want to know if it failed
-    });
-} else {
-  console.warn("MONGODB_URI not defined. File persistence disabled.");
+let isConnected = false;
+
+async function connectToDatabase() {
+  if (isConnected && mongoose.connection.readyState === 1) {
+    return;
+  }
+
+  if (!mongoUri) {
+    console.warn("MONGODB_URI not defined. Database persistence disabled.");
+    return;
+  }
+
+  try {
+    const opts = {
+      bufferCommands: false,
+    };
+    await mongoose.connect(mongoUri, opts);
+    isConnected = true;
+    console.log("Connected to MongoDB Atlas via Mongoose");
+  } catch (err) {
+    console.error("MongoDB connection error:", err);
+    throw err;
+  }
 }
 
-const checkDbConnection = (req: any, res: any, next: any) => {
-  if (mongoose.connection.readyState !== 1) {
-    if (!process.env.MONGODB_URI) {
-      return res.status(500).json({ error: "Database configuration error (MONGODB_URI missing). Please check your Vercel Environment Variables." });
+// Initial connection for non-vercel
+if (!process.env.VERCEL && mongoUri) {
+  connectToDatabase();
+}
+
+const checkDbConnection = async (req: any, res: any, next: any) => {
+  try {
+    await connectToDatabase();
+    if (mongoose.connection.readyState !== 1 && mongoUri) {
+      return res.status(503).json({ error: "Database connecting... please try again in a moment." });
     }
-    return res.status(503).json({ error: "Database connecting... please try again in a moment." });
+    if (!mongoUri) {
+      return res.status(500).json({ error: "Database configuration error (MONGODB_URI missing). Please check your Environment Variables." });
+    }
+    next();
+  } catch (err: any) {
+    return res.status(500).json({ error: "Database connection failed: " + err.message });
   }
-  next();
 };
+
+// Logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
 
 // --- AI Client ---
 let groq: Groq | null = null;
@@ -147,16 +176,32 @@ app.post("/api/auth/register", checkDbConnection, async (req, res) => {
 });
 
 app.post("/api/auth/login", checkDbConnection, async (req, res) => {
+  console.log(`Login attempt for: ${req.body?.email}`);
   try {
     const { email, password } = req.body;
+    if (!email || !password) {
+      console.log("Login failed: Missing email or password");
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+    
     const user = await User.findOne({ email });
-    if (!user || !await bcrypt.compare(password, user.password)) {
+    if (!user) {
+      console.log(`Login failed: User not found - ${email}`);
       return res.status(401).json({ error: "Invalid credentials" });
     }
+    
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      console.log(`Login failed: Incorrect password for - ${email}`);
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+    
     const token = jwt.sign({ id: user._id, role: user.role, email: user.email, name: user.name }, JWT_SECRET);
+    console.log(`Login success: ${email}`);
     res.json({ token, user: { id: user._id, role: user.role, name: user.name, email: user.email, sectionId: user.sectionId } });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Internal server error: " + err.message });
   }
 });
 
@@ -328,6 +373,7 @@ const SEED_QUESTIONS = [
 // --- Vite Middleware ---
 export async function startServer() {
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: "spa" });
     app.use(vite.middlewares);
   } else {
