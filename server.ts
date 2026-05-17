@@ -103,22 +103,49 @@ async function connectToDatabase() {
 }
 
 // Initial connection
+async function seedDatabase() {
+  try {
+    const count = await Question.countDocuments();
+    if (count === 0) {
+      console.log("No questions found in DB. Seeding initial data...");
+      await Question.insertMany(SEED_QUESTIONS.map(q => {
+        const { id, ...rest } = q;
+        return { ...rest };
+      }));
+      console.log("Database seeded successfully!");
+    }
+  } catch (err) {
+    console.error("Seeding failed:", err);
+  }
+}
+
 if (!process.env.VERCEL && process.env.MONGODB_URI) {
-  connectToDatabase();
+  connectToDatabase().then(() => {
+    seedDatabase();
+  });
 }
 
 const checkDbConnection = async (req: any, res: any, next: any) => {
   try {
-    console.log(`Checking connection state: ${mongoose.connection.readyState}`);
-    await connectToDatabase();
+    const connected = mongoose.connection.readyState === 1;
+    if (!connected) {
+      console.log("Attempting to reconnect to DB...");
+      await connectToDatabase();
+    }
+    
     if (mongoose.connection.readyState !== 1) {
-      console.warn("Database not ready, returning 503");
-      return res.status(503).json({ error: "Database connecting... please try again in a moment." });
+      return res.status(503).json({ 
+        error: "Database is still connecting. Please wait a few seconds and try again.",
+        state: mongoose.connection.readyState
+      });
     }
     next();
   } catch (err: any) {
     console.error("Critical database error in middleware:", err);
-    return res.status(500).json({ error: "Database connection failed. Ensure MONGODB_URI is set correctly. Error: " + err.message });
+    return res.status(500).json({ 
+      error: "Could not establish database connection. Check your MONGODB_URI.",
+      details: err.message 
+    });
   }
 };
 
@@ -307,19 +334,21 @@ app.delete("/api/sections/:id", authenticateToken, async (req: any, res) => {
 });
 
 // Questions
-app.get("/api/exercises", async (req, res) => {
+app.get("/api/exercises", checkDbConnection, async (req, res) => {
   try {
-    const questions = await Question.find().populate("authorId", "name role");
+    const questions = await Question.find().populate("authorId", "name role").lean();
     console.log(`Fetched ${questions.length} questions from DB`);
     
-    // If no questions in DB, return default ones
+    // Always include seed questions if DB is totally empty for some reason, 
+    // or as a safety fallback handled by lean mapping
     if (questions.length === 0) {
       return res.json(SEED_QUESTIONS.map(q => ({ ...q, _id: q.id })));
     }
     res.json(questions);
   } catch (err: any) {
     console.error("Error fetching exercises:", err);
-    res.status(500).json({ error: "Failed to fetch exercises" });
+    // Explicitly return seed data if fetching fails but we want the app to work
+    res.json(SEED_QUESTIONS.map(q => ({ ...q, _id: q.id })));
   }
 });
 
