@@ -926,7 +926,7 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
                 <Sparkles size={16} className="text-yellow-500" />
                 <h3 className="font-black text-sm uppercase tracking-widest text-black">Pedagogical Insights</h3>
              </div>
-             <p className="text-sm leading-relaxed text-black font-bold">
+             <p className="text-sm leading-relaxed text-black">
                Your authored questions are contributing to the global bank accessible by all students in the FIITS network.
              </p>
           </div>
