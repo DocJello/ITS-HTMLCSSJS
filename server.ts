@@ -128,27 +128,35 @@ if (!process.env.VERCEL && process.env.MONGODB_URI) {
 
 const checkDbConnection = async (req: any, res: any, next: any) => {
   try {
+    // If connecting, wait up to 8 seconds
+    if (mongoose.connection.readyState === 2) {
+      console.log("Database connection in progress (state 2). Waiting...");
+      for (let i = 0; i < 16; i++) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        if (mongoose.connection.readyState === 1) break;
+      }
+    }
+
     const connected = mongoose.connection.readyState === 1;
     if (!connected) {
-      console.log("Database not ready (Current State: " + mongoose.connection.readyState + "). Attempting quick refresh...");
-      // For persistent connections, we just check if it's currently connecting
-      if (mongoose.connection.readyState === 0) {
-        connectToDatabase().catch(err => console.error("Reconnect attempt failed", err));
+      if (mongoose.connection.readyState === 0 || mongoose.connection.readyState === 3) {
+        console.log("Database disconnected or disconnecting. Reconnecting...");
+        await connectToDatabase();
       }
     }
     
     if (mongoose.connection.readyState !== 1) {
       return res.status(503).json({ 
-        error: "Database is warming up (State: " + mongoose.connection.readyState + "). Please refresh in a few seconds.",
+        error: "Database is warming up (State: " + mongoose.connection.readyState + "). Please try again in a few moments.",
         state: mongoose.connection.readyState,
-        retryAfter: 5
+        retryAfter: 3
       });
     }
     next();
   } catch (err: any) {
     console.error("Critical database error in middleware:", err);
     return res.status(500).json({ 
-      error: "Critical Database Error. Ensure MONGODB_URI is valid.",
+      error: "Critical Database Error. Check MONGODB_URI.",
       details: err.message 
     });
   }
