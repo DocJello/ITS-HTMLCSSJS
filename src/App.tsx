@@ -50,14 +50,14 @@ const MODULES: Module[] = [
         id: "m1-s1", 
         title: "Introduction", 
         content: "HTML (HyperText Markup Language) is the most basic building block of the Web. It defines the meaning and structure of web content.",
-        videos: ["https://www.youtube.com/embed/kUMe1FH4CHE", "https://www.youtube.com/embed/ok-plXXHlWw"],
+        videos: ["https://www.youtube.com/embed/pQN-pnXPaVg", "https://www.youtube.com/embed/qz0aGYrrlhU"],
         link: "https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web/HTML_basics"
       },
       { 
         id: "m1-s2", 
         title: "Getting Started", 
         content: "To get started with HTML, you only need a text editor and a web browser. Every HTML file must start with a <!DOCTYPE html> declaration.",
-        videos: ["https://www.youtube.com/embed/vLnPwxZdW4Y", "https://www.youtube.com/embed/88PLf4-tpxU"],
+        videos: ["https://www.youtube.com/embed/Xp0fT-c3l3A", "https://www.youtube.com/embed/MMeM5b7vG9E"],
         link: "https://www.w3schools.com/html/html_intro.asp"
       }
     ]
@@ -924,9 +924,9 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
           <div className="bg-white p-6 rounded-xl border border-linkedin-border shadow-sm">
              <div className="flex items-center gap-2 mb-4">
                 <Sparkles size={16} className="text-yellow-500" />
-                <h3 className="font-black text-xs uppercase tracking-widest text-black">Pedagogical Insights</h3>
+                <h3 className="font-black text-sm uppercase tracking-widest text-black">Pedagogical Insights</h3>
              </div>
-             <p className="text-xs leading-relaxed text-black font-semibold">
+             <p className="text-sm leading-relaxed text-black font-bold">
                Your authored questions are contributing to the global bank accessible by all students in the FIITS network.
              </p>
           </div>
