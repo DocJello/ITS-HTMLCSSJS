@@ -128,28 +128,32 @@ if (!process.env.VERCEL && process.env.MONGODB_URI) {
 
 const checkDbConnection = async (req: any, res: any, next: any) => {
   try {
-    // If connecting, wait up to 8 seconds
+    // If connecting, wait up to 15 seconds (increased for Atlas cold starts)
     if (mongoose.connection.readyState === 2) {
-      console.log("Database connection in progress (state 2). Waiting...");
-      for (let i = 0; i < 16; i++) {
+      console.log("Database connection in progress (state: connecting). Waiting...");
+      for (let i = 0; i < 30; i++) {
         await new Promise(resolve => setTimeout(resolve, 500));
-        if ((mongoose.connection.readyState as any) === 1) break;
+        if ((mongoose.connection.readyState as any) === 1) {
+          console.log("Database connected successfully during wait loop.");
+          break;
+        }
       }
     }
 
     const connected = mongoose.connection.readyState === 1;
     if (!connected) {
       if (mongoose.connection.readyState === 0 || mongoose.connection.readyState === 3) {
-        console.log("Database disconnected or disconnecting. Reconnecting...");
+        console.log("Database disconnected or disconnecting. Attempting reconnection...");
         await connectToDatabase();
       }
     }
     
     if (mongoose.connection.readyState !== 1) {
+      console.error(`Database not ready after wait. State: ${mongoose.connection.readyState}`);
       return res.status(503).json({ 
-        error: "Database is warming up (State: " + mongoose.connection.readyState + "). Please try again in a few moments.",
+        error: "Database is warming up (State: " + mongoose.connection.readyState + "). Please refresh in a few seconds.",
         state: mongoose.connection.readyState,
-        retryAfter: 3
+        retryAfter: 5
       });
     }
     next();
