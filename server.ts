@@ -85,16 +85,17 @@ async function connectToDatabase() {
 
   const mongoUri = process.env.MONGODB_URI;
   if (!mongoUri) {
-    throw new Error("MONGODB_URI is not defined in environment variables.");
+    throw new Error("MONGODB_URI is not defined.");
   }
 
   try {
     const opts = {
-      bufferCommands: false,
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s
+      bufferCommands: false, // Don't hang if connection isn't ready
+      serverSelectionTimeoutMS: 15000, 
+      heartbeatFrequencyMS: 10000,
     };
     cachedConnection = await mongoose.connect(mongoUri, opts);
-    console.log("Connected to MongoDB via Mongoose");
+    console.log("Connected to MongoDB via Mongoose (No Buffering)");
     return cachedConnection;
   } catch (err) {
     console.error("MongoDB connection error:", err);
@@ -129,21 +130,25 @@ const checkDbConnection = async (req: any, res: any, next: any) => {
   try {
     const connected = mongoose.connection.readyState === 1;
     if (!connected) {
-      console.log("Attempting to reconnect to DB...");
-      await connectToDatabase();
+      console.log("Database not ready (Current State: " + mongoose.connection.readyState + "). Attempting quick refresh...");
+      // For persistent connections, we just check if it's currently connecting
+      if (mongoose.connection.readyState === 0) {
+        connectToDatabase().catch(err => console.error("Reconnect attempt failed", err));
+      }
     }
     
     if (mongoose.connection.readyState !== 1) {
       return res.status(503).json({ 
-        error: "Database is still connecting. Please wait a few seconds and try again.",
-        state: mongoose.connection.readyState
+        error: "Database is warming up (State: " + mongoose.connection.readyState + "). Please refresh in a few seconds.",
+        state: mongoose.connection.readyState,
+        retryAfter: 5
       });
     }
     next();
   } catch (err: any) {
     console.error("Critical database error in middleware:", err);
     return res.status(500).json({ 
-      error: "Could not establish database connection. Check your MONGODB_URI.",
+      error: "Critical Database Error. Ensure MONGODB_URI is valid.",
       details: err.message 
     });
   }
