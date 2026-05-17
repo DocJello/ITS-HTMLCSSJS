@@ -133,7 +133,7 @@ const checkDbConnection = async (req: any, res: any, next: any) => {
       console.log("Database connection in progress (state 2). Waiting...");
       for (let i = 0; i < 16; i++) {
         await new Promise(resolve => setTimeout(resolve, 500));
-        if (mongoose.connection.readyState === 1) break;
+        if ((mongoose.connection.readyState as any) === 1) break;
       }
     }
 
