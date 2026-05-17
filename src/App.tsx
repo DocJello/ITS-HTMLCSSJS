@@ -50,14 +50,14 @@ const MODULES: Module[] = [
         id: "m1-s1", 
         title: "Introduction", 
         content: "HTML (HyperText Markup Language) is the most basic building block of the Web. It defines the meaning and structure of web content.",
-        videos: ["https://www.youtube.com/embed/pQN-pnXPaVg", "https://www.youtube.com/embed/qz0aGYrrlhU"],
+        videos: ["https://www.youtube.com/embed/vLnPwxZdW4Y", "https://www.youtube.com/embed/qz0aGYrrlhU"],
         link: "https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web/HTML_basics"
       },
       { 
         id: "m1-s2", 
         title: "Getting Started", 
         content: "To get started with HTML, you only need a text editor and a web browser. Every HTML file must start with a <!DOCTYPE html> declaration.",
-        videos: ["https://www.youtube.com/embed/Xp0fT-c3l3A", "https://www.youtube.com/embed/MMeM5b7vG9E"],
+        videos: ["https://www.youtube.com/embed/G3e-cpL7ofc", "https://www.youtube.com/embed/6mbwJ2xhgzM"],
         link: "https://www.w3schools.com/html/html_intro.asp"
       }
     ]
@@ -67,9 +67,9 @@ const MODULES: Module[] = [
     title: "HTML Structure",
     topic: "HTML",
     submodules: [
-      { id: "m2-s1", title: "Carriage returns and thematic break lines", content: "The <br> tag inserts a single line break. The <hr> tag defines a thematic break in an HTML page.", videos: [], link: "" },
-      { id: "m2-s2", title: "Commenting", content: "HTML comments are not displayed by the browser, but they can help document your HTML source code.", videos: [], link: "" },
-      { id: "m2-s3", title: "Special characters", content: "Special characters in HTML are represented using character entities like &nbsp; for space or &lt; for less than.", videos: [], link: "" }
+      { id: "m2-s1", title: "Carriage returns and thematic break lines", content: "The <br> tag inserts a single line break. The <hr> tag defines a thematic break in an HTML page.", videos: ["https://www.youtube.com/embed/qz0aGYrrlhU", "https://www.youtube.com/embed/6mbwJ2xhgzM"], link: "https://www.w3schools.com/tags/tag_br.asp" },
+      { id: "m2-s2", title: "Commenting", content: "HTML comments are not displayed by the browser, but they can help document your HTML source code.", videos: ["https://www.youtube.com/embed/G3e-cpL7ofc", "https://www.youtube.com/embed/vLnPwxZdW4Y"], link: "https://www.w3schools.com/html/html_comments.asp" },
+      { id: "m2-s3", title: "Special characters", content: "Special characters in HTML are represented using character entities like &nbsp; for space or &lt; for less than.", videos: ["https://www.youtube.com/embed/6mbwJ2xhgzM", "https://www.youtube.com/embed/qz0aGYrrlhU"], link: "https://www.w3schools.com/html/html_entities.asp" }
     ]
   },
   {
@@ -77,9 +77,9 @@ const MODULES: Module[] = [
     title: "HTML Connectivity",
     topic: "HTML",
     submodules: [
-      { id: "m3-s1", title: "Hyperlinks", content: "HTML links are hyperlinks. You can click on a link and jump to another document.", videos: [], link: "" },
-      { id: "m3-s2", title: "HTML elements (and their attributes)", content: "An HTML element is defined by a start tag, some content, and an end tag. Attributes provide additional information about elements.", videos: [], link: "" },
-      { id: "m3-s3", title: "Browser feature detection", content: "Feature detection involves testing whether a browser supports a certain block of code, and running different code if it doesn't.", videos: [], link: "" }
+      { id: "m3-s1", title: "Hyperlinks", content: "HTML links are hyperlinks. You can click on a link and jump to another document.", videos: ["https://www.youtube.com/embed/vLnPwxZdW4Y", "https://www.youtube.com/embed/G3e-cpL7ofc"], link: "https://www.w3schools.com/html/html_links.asp" },
+      { id: "m3-s2", title: "HTML elements (and their attributes)", content: "An HTML element is defined by a start tag, some content, and an end tag. Attributes provide additional information about elements.", videos: ["https://www.youtube.com/embed/qz0aGYrrlhU", "https://www.youtube.com/embed/6mbwJ2xhgzM"], link: "https://www.w3schools.com/html/html_elements.asp" },
+      { id: "m3-s3", title: "Browser feature detection", content: "Feature detection involves testing whether a browser supports a certain block of code, and running different code if it doesn't.", videos: ["https://www.youtube.com/embed/vLnPwxZdW4Y", "https://www.youtube.com/embed/G3e-cpL7ofc"], link: "https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Feature_detection" }
     ]
   },
   {
@@ -87,7 +87,7 @@ const MODULES: Module[] = [
     title: "CSS Fundamentals",
     topic: "CSS",
     submodules: [
-      { id: "m4-s1", title: "Introduction", content: "CSS is the language we use to style an HTML document. CSS describes how HTML elements should be displayed.", videos: ["https://www.youtube.com/embed/1Rs2ND1RYYc"], link: "https://developer.mozilla.org/en-US/docs/Learn/CSS/First_steps/What_is_CSS" }
+      { id: "m4-s1", title: "Introduction", content: "CSS is the language we use to style an HTML document. CSS describes how HTML elements should be displayed.", videos: ["https://www.youtube.com/embed/jS4aFq5-91M", "https://www.youtube.com/embed/G3e-cpL7ofc"], link: "https://developer.mozilla.org/en-US/docs/Learn/CSS/First_steps/What_is_CSS" }
     ]
   },
   {
@@ -95,7 +95,7 @@ const MODULES: Module[] = [
     title: "CSS Selectors",
     topic: "CSS",
     submodules: [
-      { id: "m5-s1", title: "Selectors", content: "CSS selectors are used to 'find' (or select) the HTML elements you want to style.", videos: ["https://www.youtube.com/embed/l1mER1ZHTn8"], link: "https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Selectors" }
+      { id: "m5-s1", title: "Selectors", content: "CSS selectors are used to 'find' (or select) the HTML elements you want to style.", videos: ["https://www.youtube.com/embed/l1mER1ZHTn8", "https://www.youtube.com/embed/G3e-cpL7ofc"], link: "https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Selectors" }
     ]
   },
   {
@@ -103,7 +103,7 @@ const MODULES: Module[] = [
     title: "CSS Advanced",
     topic: "CSS",
     submodules: [
-      { id: "m6-s1", title: "Hints and further information", content: "Deep dive into cascading, specificity, and the inheritance of styles.", videos: [], link: "" }
+      { id: "m6-s1", title: "Hints and further information", content: "Deep dive into cascading, specificity, and the inheritance of styles.", videos: ["https://www.youtube.com/embed/jS4aFq5-91M", "https://www.youtube.com/embed/l1mER1ZHTn8"], link: "https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Cascade_and_inheritance" }
     ]
   },
   {
@@ -111,9 +111,9 @@ const MODULES: Module[] = [
     title: "JavaScript Basics",
     topic: "JavaScript",
     submodules: [
-      { id: "m7-s1", title: "Introduction", content: "JavaScript is the world's most popular programming language. It is the language of the Web.", videos: ["https://www.youtube.com/embed/W6NZfCO5SIk"], link: "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/First_steps/What_is_JavaScript" },
-      { id: "m7-s2", title: "Variables", content: "Variables are containers for storing data (storing data values).", videos: ["https://www.youtube.com/embed/edWbHp_k_9Y"], link: "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/First_steps/Variables" },
-      { id: "m7-s3", title: "Statements", content: "A computer program is a list of 'instructions' to be 'executed' by a computer. In a programming language, these programming instructions are called statements.", videos: [], link: "" }
+      { id: "m7-s1", title: "Introduction", content: "JavaScript is the world's most popular programming language. It is the language of the Web.", videos: ["https://www.youtube.com/embed/W6NZfCO5SIk", "https://www.youtube.com/embed/FQdaUv95mR8"], link: "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/First_steps/What_is_JavaScript" },
+      { id: "m7-s2", title: "Variables", content: "Variables are containers for storing data (storing data values).", videos: ["https://www.youtube.com/embed/EerdGm-ehng", "https://www.youtube.com/embed/edWbHp_k_9Y"], link: "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/First_steps/Variables" },
+      { id: "m7-s3", title: "Statements", content: "A computer program is a list of 'instructions' to be 'executed' by a computer. In a programming language, these programming instructions are called statements.", videos: ["https://www.youtube.com/embed/W6NZfCO5SIk", "https://www.youtube.com/embed/edWbHp_k_9Y"], link: "" }
     ]
   },
   {
@@ -121,8 +121,8 @@ const MODULES: Module[] = [
     title: "JavaScript Logic",
     topic: "JavaScript",
     submodules: [
-      { id: "m8-s1", title: "Functions", content: "A JavaScript function is a block of code designed to perform a particular task.", videos: [], link: "" },
-      { id: "m8-s2", title: "Event handling", content: "HTML events are 'things' that happen to HTML elements. When JavaScript is used in HTML pages, JavaScript can 'react' on these events.", videos: [], link: "" }
+      { id: "m8-s1", title: "Functions", content: "A JavaScript function is a block of code designed to perform a particular task.", videos: ["https://www.youtube.com/embed/FQdaUv95mR8", "https://www.youtube.com/embed/EerdGm-ehng"], link: "https://www.w3schools.com/js/js_functions.asp" },
+      { id: "m8-s2", title: "Event handling", content: "HTML events are 'things' that happen to HTML elements. When JavaScript is used in HTML pages, JavaScript can 'react' on these events.", videos: ["https://www.youtube.com/embed/W6NZfCO5SIk", "https://www.youtube.com/embed/edWbHp_k_9Y"], link: "https://www.w3schools.com/js/js_events.asp" }
     ]
   },
   {
@@ -130,8 +130,8 @@ const MODULES: Module[] = [
     title: "JavaScript DOM",
     topic: "JavaScript",
     submodules: [
-      { id: "m9-s1", title: "The Document Object Model (DOM)", content: "With the HTML DOM, JavaScript can access and change all the elements of an HTML document.", videos: ["https://www.youtube.com/embed/0ik6X4DJKCc"], link: "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Client-side_web_APIs/Manipulating_documents" },
-      { id: "m9-s2", title: "Miscellaneous", content: "Advanced JS concepts like closures, promises, and async/await.", videos: ["https://www.youtube.com/embed/H24Sipxv5nk"], link: "" }
+      { id: "m9-s1", title: "The Document Object Model (DOM)", content: "With the HTML DOM, JavaScript can access and change all the elements of an HTML document.", videos: ["https://www.youtube.com/embed/FQdaUv95mR8", "https://www.youtube.com/embed/W6NZfCO5SIk"], link: "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Client-side_web_APIs/Manipulating_documents" },
+      { id: "m9-s2", title: "Miscellaneous", content: "Advanced JS concepts like closures, promises, and async/await.", videos: ["https://www.youtube.com/embed/EerdGm-ehng", "https://www.youtube.com/embed/edWbHp_k_9Y"], link: "" }
     ]
   }
 ];
@@ -926,8 +926,8 @@ function TeacherDashboard({ user, token }: { user: User, token: string }) {
                 <Sparkles size={16} className="text-yellow-500" />
                 <h3 className="font-black text-sm uppercase tracking-widest text-black">Pedagogical Insights</h3>
              </div>
-             <p className="text-sm leading-relaxed text-black">
-               Your authored questions are contributing to the global bank accessible by all students in the FIITS network.
+             <p className="text-lg leading-relaxed text-black font-normal">
+               Your authored questions are contributing to the global bank accessible by all students in the FIITS network. These insights help track engagement patterns across multiple sections.
              </p>
           </div>
         </aside>
@@ -1657,15 +1657,6 @@ export default function App() {
                 <span className="text-[10px] mt-1 font-semibold uppercase tracking-wider">Modules</span>
               </button>
             )}
-            {user.role === UserRole.STUDENT && (
-              <button 
-                onClick={() => setAppState("solving")} 
-                className={`flex flex-col items-center justify-center h-14 w-20 transition-all ${appState === 'solving' ? 'border-b-2 border-linkedin-blue text-linkedin-blue' : 'text-linkedin-text-muted hover:text-linkedin-text'}`}
-              >
-                <Code2 size={18} />
-                <span className="text-[10px] mt-1 font-semibold uppercase tracking-wider">Tutor</span>
-              </button>
-            )}
             {(user.role === UserRole.TEACHER || user.role === UserRole.ADMIN) && (
               <button 
                 onClick={() => setAppState("teacher_dashboard")} 
@@ -1793,6 +1784,36 @@ export default function App() {
                       <Info size={14} />
                       Hint 
                     </button>
+                    {(!assessmentMode || assessmentMode.type === 'formative') && (
+                      <button 
+                        onClick={() => {
+                          if (attempts.length === 0) {
+                            alert("Please try solving the task at least once before consulting the tutor.");
+                            return;
+                          }
+                          // Manually trigger analysis
+                          setIsSubmitting(true);
+                          fetch("/api/adaptive/analyze", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                            body: JSON.stringify({
+                              reflection: reflection || "Student requested manual tutor assistance.",
+                              attempts,
+                              feedbackLogs,
+                              exerciseId: currentExercise?.id || "unknown",
+                              assessmentType: assessmentMode?.type || 'standard'
+                            })
+                          })
+                          .then(res => res.json())
+                          .then(data => setFeedback(data))
+                          .finally(() => setIsSubmitting(false));
+                        }}
+                        className="bg-linkedin-blue text-white hover:bg-blue-800 px-4 py-1.5 rounded-full font-bold text-xs transition-all shadow-md active:scale-95 flex items-center gap-2"
+                      >
+                        <BrainCircuit size={14} />
+                        Ask Tutor
+                      </button>
+                    )}
                   </div>
                 </div>
 
