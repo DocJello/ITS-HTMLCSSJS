@@ -1823,12 +1823,9 @@ export default function App() {
                 <div className="p-4 flex-1">
                   <div 
                     className="bg-[#1e1e1e] rounded-xl overflow-hidden border border-[#333] shadow-lg h-[450px] cursor-text"
-                    onKeyDown={(e) => {
-                      // Prevent certain keys from bubbling up to parents where they might be intercepted
-                      if (['Backspace', 'Enter', 'Tab', 'Escape', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-                        e.stopPropagation();
-                      }
-                    }}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    onKeyUp={(e) => e.stopPropagation()}
+                    onKeyPress={(e) => e.stopPropagation()}
                   >
                     <div className="bg-[#2d2d2d] px-4 py-2 flex items-center justify-between">
                       <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">editor.js</span>
@@ -1886,12 +1883,20 @@ export default function App() {
                         // Control character handling
                         formatOnType: true,
                         formatOnPaste: true,
+                        autoFocus: true,
+                        tabSize: 2,
+                        insertSpaces: true,
+                        detectIndentation: true,
                         // Prevent browser from stealing focus on some keys
                         stopRenderingLineAfter: 5000,
                         quickSuggestions: {
                           other: true,
                           comments: true,
                           strings: true
+                        },
+                        unicodeHighlight: {
+                          ambiguousCharacters: false,
+                          invisibleCharacters: false
                         }
                       }}
                     />
