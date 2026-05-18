@@ -57,7 +57,7 @@ const MODULES: Module[] = [
         id: "m1-s2", 
         title: "Getting Started", 
         content: "To get started with HTML, you only need a text editor and a web browser. Every HTML file must start with a <!DOCTYPE html> declaration.",
-        videos: ["https://www.youtube.com/embed/G3e-cpL7ofc", "https://www.youtube.com/embed/6mbwJ2xhgzM"],
+        videos: ["https://www.youtube.com/embed/qz0aGYrrlhU", "https://www.youtube.com/embed/6mbwJ2xhgzM"],
         link: "https://www.w3schools.com/html/html_intro.asp"
       }
     ]
@@ -68,7 +68,7 @@ const MODULES: Module[] = [
     topic: "HTML",
     submodules: [
       { id: "m2-s1", title: "Carriage returns and thematic break lines", content: "The <br> tag inserts a single line break. The <hr> tag defines a thematic break in an HTML page.", videos: ["https://www.youtube.com/embed/qz0aGYrrlhU", "https://www.youtube.com/embed/6mbwJ2xhgzM"], link: "https://www.w3schools.com/tags/tag_br.asp" },
-      { id: "m2-s2", title: "Commenting", content: "HTML comments are not displayed by the browser, but they can help document your HTML source code.", videos: ["https://www.youtube.com/embed/G3e-cpL7ofc", "https://www.youtube.com/embed/vLnPwxZdW4Y"], link: "https://www.w3schools.com/html/html_comments.asp" },
+      { id: "m2-s2", title: "Commenting", content: "HTML comments are not displayed by the browser, but they can help document your HTML source code.", videos: ["https://www.youtube.com/embed/6mbwJ2xhgzM", "https://www.youtube.com/embed/vLnPwxZdW4Y"], link: "https://www.w3schools.com/html/html_comments.asp" },
       { id: "m2-s3", title: "Special characters", content: "Special characters in HTML are represented using character entities like &nbsp; for space or &lt; for less than.", videos: ["https://www.youtube.com/embed/6mbwJ2xhgzM", "https://www.youtube.com/embed/qz0aGYrrlhU"], link: "https://www.w3schools.com/html/html_entities.asp" }
     ]
   },
@@ -77,9 +77,9 @@ const MODULES: Module[] = [
     title: "HTML Connectivity",
     topic: "HTML",
     submodules: [
-      { id: "m3-s1", title: "Hyperlinks", content: "HTML links are hyperlinks. You can click on a link and jump to another document.", videos: ["https://www.youtube.com/embed/vLnPwxZdW4Y", "https://www.youtube.com/embed/G3e-cpL7ofc"], link: "https://www.w3schools.com/html/html_links.asp" },
+      { id: "m3-s1", title: "Hyperlinks", content: "HTML links are hyperlinks. You can click on a link and jump to another document.", videos: ["https://www.youtube.com/embed/vLnPwxZdW4Y", "https://www.youtube.com/embed/qz0aGYrrlhU"], link: "https://www.w3schools.com/html/html_links.asp" },
       { id: "m3-s2", title: "HTML elements (and their attributes)", content: "An HTML element is defined by a start tag, some content, and an end tag. Attributes provide additional information about elements.", videos: ["https://www.youtube.com/embed/qz0aGYrrlhU", "https://www.youtube.com/embed/6mbwJ2xhgzM"], link: "https://www.w3schools.com/html/html_elements.asp" },
-      { id: "m3-s3", title: "Browser feature detection", content: "Feature detection involves testing whether a browser supports a certain block of code, and running different code if it doesn't.", videos: ["https://www.youtube.com/embed/vLnPwxZdW4Y", "https://www.youtube.com/embed/G3e-cpL7ofc"], link: "https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Feature_detection" }
+      { id: "m3-s3", title: "Browser feature detection", content: "Feature detection involves testing whether a browser supports a certain block of code, and running different code if it doesn't.", videos: ["https://www.youtube.com/embed/vLnPwxZdW4Y", "https://www.youtube.com/embed/FQdaUv95mR8"], link: "https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Feature_detection" }
     ]
   },
   {
@@ -87,23 +87,26 @@ const MODULES: Module[] = [
     title: "CSS Fundamentals",
     topic: "CSS",
     submodules: [
-      { id: "m4-s1", title: "Introduction", content: "CSS is the language we use to style an HTML document. CSS describes how HTML elements should be displayed.", videos: ["https://www.youtube.com/embed/jS4aFq5-91M", "https://www.youtube.com/embed/G3e-cpL7ofc"], link: "https://developer.mozilla.org/en-US/docs/Learn/CSS/First_steps/What_is_CSS" }
+      { id: "m4-s1", title: "Syntax & Selectors", content: "Understanding how CSS targets HTML and the basic structure of rulesets.", videos: ["https://www.youtube.com/embed/I9XRrlOOazo", "https://www.youtube.com/embed/yfoY53QXEnI"], link: "https://www.w3schools.com/css/css_syntax.asp" },
+      { id: "m4-s2", title: "Colors & Backgrounds", content: "Mastering color units and background styling techniques.", videos: ["https://www.youtube.com/embed/v77uIs8Y9u4"], link: "https://www.w3schools.com/css/css_colors.asp" }
     ]
   },
   {
     id: "m5",
-    title: "CSS Selectors",
+    title: "Layout Foundations",
     topic: "CSS",
     submodules: [
-      { id: "m5-s1", title: "Selectors", content: "CSS selectors are used to 'find' (or select) the HTML elements you want to style.", videos: ["https://www.youtube.com/embed/l1mER1ZHTn8", "https://www.youtube.com/embed/G3e-cpL7ofc"], link: "https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Selectors" }
+      { id: "m5-s1", title: "The Box Model", content: "Padding, margins, borders, and content sizing deeply explained.", videos: ["https://www.youtube.com/embed/1Rs2ND1RYYc"], link: "https://www.w3schools.com/css/css_boxmodel.asp" },
+      { id: "m5-s2", title: "Display & Flow", content: "Understanding block, inline, and the normal document flow.", videos: ["https://www.youtube.com/embed/qz0aGYrrlhU"], link: "https://www.w3schools.com/css/css_display_visibility.asp" }
     ]
   },
   {
     id: "m6",
-    title: "CSS Advanced",
+    title: "Modern Layouts",
     topic: "CSS",
     submodules: [
-      { id: "m6-s1", title: "Hints and further information", content: "Deep dive into cascading, specificity, and the inheritance of styles.", videos: ["https://www.youtube.com/embed/jS4aFq5-91M", "https://www.youtube.com/embed/l1mER1ZHTn8"], link: "https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Cascade_and_inheritance" }
+      { id: "m6-s1", title: "Flexbox Mastery", content: "One-dimensional layout power for modern web design.", videos: ["https://www.youtube.com/embed/yO_6k_KIdOQ", "https://www.youtube.com/embed/38Noof9A_qM"], link: "https://www.w3schools.com/css/css3_flexbox.asp" },
+      { id: "m6-s2", title: "CSS Grid & Positioning", content: "Two-dimensional layouts and advanced element positioning.", videos: ["https://www.youtube.com/embed/jS4aFq5-91M", "https://www.youtube.com/embed/fXlV86pI014"], link: "https://www.w3schools.com/css/css_grid.asp" }
     ]
   },
   {
@@ -111,9 +114,9 @@ const MODULES: Module[] = [
     title: "JavaScript Basics",
     topic: "JavaScript",
     submodules: [
-      { id: "m7-s1", title: "Introduction", content: "JavaScript is the world's most popular programming language. It is the language of the Web.", videos: ["https://www.youtube.com/embed/W6NZfCO5SIk", "https://www.youtube.com/embed/FQdaUv95mR8"], link: "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/First_steps/What_is_JavaScript" },
-      { id: "m7-s2", title: "Variables", content: "Variables are containers for storing data (storing data values).", videos: ["https://www.youtube.com/embed/EerdGm-ehng", "https://www.youtube.com/embed/edWbHp_k_9Y"], link: "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/First_steps/Variables" },
-      { id: "m7-s3", title: "Statements", content: "A computer program is a list of 'instructions' to be 'executed' by a computer. In a programming language, these programming instructions are called statements.", videos: ["https://www.youtube.com/embed/W6NZfCO5SIk", "https://www.youtube.com/embed/edWbHp_k_9Y"], link: "" }
+      { id: "m7-s1", title: "Introduction", content: "JavaScript is the engine of interactivity on the web.", videos: ["https://www.youtube.com/embed/qoSksQ4s_hg", "https://www.youtube.com/embed/vLnPwxZdW4Y"], link: "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/First_steps/What_is_JavaScript" },
+      { id: "m7-s2", title: "Variables & Types", content: "Containers for data and the different flavors of information in JS.", videos: ["https://www.youtube.com/embed/W_27S_Ym-G8", "https://www.youtube.com/embed/qoSksQ4s_hg"], link: "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/First_steps/Variables" },
+      { id: "m7-s3", title: "Fundamentals Part 3", content: "Deepening your understanding of JS execution and basics.", videos: ["https://www.youtube.com/embed/qoSksQ4s_hg", "https://www.youtube.com/embed/qz0aGYrrlhU"], link: "" }
     ]
   },
   {
@@ -121,8 +124,8 @@ const MODULES: Module[] = [
     title: "JavaScript Logic",
     topic: "JavaScript",
     submodules: [
-      { id: "m8-s1", title: "Functions", content: "A JavaScript function is a block of code designed to perform a particular task.", videos: ["https://www.youtube.com/embed/FQdaUv95mR8", "https://www.youtube.com/embed/EerdGm-ehng"], link: "https://www.w3schools.com/js/js_functions.asp" },
-      { id: "m8-s2", title: "Event handling", content: "HTML events are 'things' that happen to HTML elements. When JavaScript is used in HTML pages, JavaScript can 'react' on these events.", videos: ["https://www.youtube.com/embed/W6NZfCO5SIk", "https://www.youtube.com/embed/edWbHp_k_9Y"], link: "https://www.w3schools.com/js/js_events.asp" }
+      { id: "m8-s1", title: "Functions", content: "A JavaScript function is a block of code designed to perform a particular task.", videos: ["https://www.youtube.com/embed/0F_v9K4fV-8", "https://www.youtube.com/embed/EerdGm-ehng"], link: "https://www.w3schools.com/js/js_functions.asp" },
+      { id: "m8-s2", title: "Event handling", content: "HTML events are 'things' that happen to HTML elements. When JavaScript is used in HTML pages, JavaScript can 'react' on these events.", videos: ["https://www.youtube.com/embed/G7Z4vV1h9uY", "https://www.youtube.com/embed/edWbHp_k_9Y"], link: "https://www.w3schools.com/js/js_events.asp" }
     ]
   },
   {
@@ -130,8 +133,8 @@ const MODULES: Module[] = [
     title: "JavaScript DOM",
     topic: "JavaScript",
     submodules: [
-      { id: "m9-s1", title: "The Document Object Model (DOM)", content: "With the HTML DOM, JavaScript can access and change all the elements of an HTML document.", videos: ["https://www.youtube.com/embed/FQdaUv95mR8", "https://www.youtube.com/embed/W6NZfCO5SIk"], link: "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Client-side_web_APIs/Manipulating_documents" },
-      { id: "m9-s2", title: "Miscellaneous", content: "Advanced JS concepts like closures, promises, and async/await.", videos: ["https://www.youtube.com/embed/EerdGm-ehng", "https://www.youtube.com/embed/edWbHp_k_9Y"], link: "" }
+      { id: "m9-s1", title: "The Document Object Model (DOM)", content: "With the HTML DOM, JavaScript can access and change all the elements of an HTML document.", videos: ["https://www.youtube.com/embed/wK2C-L8Y7S8", "https://www.youtube.com/embed/W6NZfCO5SIk"], link: "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Client-side_web_APIs/Manipulating_documents" },
+      { id: "m9-s2", title: "Miscellaneous", content: "Advanced JS concepts like closures, promises, and async/await.", videos: ["https://www.youtube.com/embed/ZcQyJ-gxke0", "https://www.youtube.com/embed/edWbHp_k_9Y"], link: "" }
     ]
   }
 ];
@@ -1818,7 +1821,15 @@ export default function App() {
                 </div>
 
                 <div className="p-4 flex-1">
-                  <div className="bg-[#1e1e1e] rounded-xl overflow-hidden border border-[#333] shadow-lg h-[450px]">
+                  <div 
+                    className="bg-[#1e1e1e] rounded-xl overflow-hidden border border-[#333] shadow-lg h-[450px] cursor-text"
+                    onKeyDown={(e) => {
+                      // Prevent certain keys from bubbling up to parents where they might be intercepted
+                      if (['Backspace', 'Enter', 'Tab', 'Escape', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                        e.stopPropagation();
+                      }
+                    }}
+                  >
                     <div className="bg-[#2d2d2d] px-4 py-2 flex items-center justify-between">
                       <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">editor.js</span>
                       <Maximize2 size={12} className="text-gray-500" />
@@ -1828,6 +1839,18 @@ export default function App() {
                       language={currentExercise?.topic?.toLowerCase() === 'javascript' ? 'javascript' : 'html'}
                       theme="vs-dark"
                       value={code}
+                      onMount={(editor, monaco) => {
+                        // Force layout and focus to ensure the editor is ready for input
+                        setTimeout(() => {
+                          editor.layout();
+                          editor.focus();
+                        }, 200);
+
+                        // Add keyboard shortcut for Run Assessment (Cmd/Ctrl + Enter)
+                        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+                          handleAssessment();
+                        });
+                      }}
                       onChange={(val) => setCode(val || "")}
                       options={{
                         fontSize: 16,
@@ -1838,9 +1861,38 @@ export default function App() {
                         autoClosingBrackets: "always",
                         autoClosingTags: true,
                         autoIndent: "full",
-                        padding: { top: 20 },
+                        padding: { top: 20, bottom: 20 },
                         lineNumbers: "on",
-                        renderLineHighlight: "all"
+                        renderLineHighlight: "all",
+                        suggestOnTriggerCharacters: true,
+                        acceptSuggestionOnEnter: "on",
+                        tabSize: 2,
+                        wordWrap: "on",
+                        fixedOverflowWidgets: true,
+                        scrollbar: {
+                          vertical: 'visible',
+                          horizontal: 'visible',
+                          useShadows: false,
+                          verticalHasArrows: false,
+                          horizontalHasArrows: false,
+                          verticalScrollbarSize: 10,
+                          horizontalScrollbarSize: 10
+                        },
+                        // Resolve keyboard interaction issues by explicitly allowing all inputs
+                        links: true,
+                        contextmenu: true,
+                        multiCursorModifier: 'alt',
+                        accessibilitySupport: 'on',
+                        // Control character handling
+                        formatOnType: true,
+                        formatOnPaste: true,
+                        // Prevent browser from stealing focus on some keys
+                        stopRenderingLineAfter: 5000,
+                        quickSuggestions: {
+                          other: true,
+                          comments: true,
+                          strings: true
+                        }
                       }}
                     />
                   </div>
