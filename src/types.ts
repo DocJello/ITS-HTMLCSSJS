@@ -48,6 +48,7 @@ export interface User {
   name: string;
   role: UserRole;
   sectionId?: string; // For students
+  preTestCompleted?: boolean;
 }
 
 export interface Section {
