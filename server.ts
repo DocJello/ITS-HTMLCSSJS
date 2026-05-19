@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   role: { type: String, enum: Object.values(UserRole), required: true },
   sectionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Section' },
+  preTestCompleted: { type: Boolean, default: false },
 });
 
 const sectionSchema = new mongoose.Schema({
@@ -294,6 +295,59 @@ app.get("/api/users/teachers", authenticateToken, async (req: any, res) => {
   }
 });
 
+app.get("/api/users/students", authenticateToken, async (req: any, res) => {
+  try {
+    if (req.user.role !== UserRole.ADMIN && req.user.role !== UserRole.TEACHER) {
+      return res.sendStatus(403);
+    }
+    
+    let query: any = { role: UserRole.STUDENT };
+    
+    // If teacher, only their own students? (Actually admin might want to see all)
+    // Let's assume Admin sees all, Teacher sees all too for now, or refine if needed.
+    const students = await User.find(query)
+      .populate("sectionId", "name")
+      .select("name email _id sectionId preTestCompleted");
+    res.json(students);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/api/users/:id", authenticateToken, async (req: any, res) => {
+  if (req.user.role !== UserRole.ADMIN) return res.sendStatus(403);
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    // Also cleanup progress? Maybe not yet.
+    res.json({ message: "User deleted" });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/auth/complete-pre-test", authenticateToken, async (req: any, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    user.preTestCompleted = true;
+    await user.save();
+    res.json({ message: "Pre-test completed", user: { ...user.toObject(), id: user._id } });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Final-course assessment questions (same for pre and post)
+app.get("/api/assessments/course-baseline", authenticateToken, async (req, res) => {
+   try {
+     // Pick top 10 questions as baseline (seeded questions first)
+     const baselineQuestions = await Question.find().limit(10);
+     res.json(baselineQuestions);
+   } catch (err: any) {
+     res.status(500).json({ error: err.message });
+   }
+});
+
 app.patch("/api/sections/:id", authenticateToken, async (req: any, res) => {
   try {
     const section = await Section.findById(req.params.id);
@@ -320,9 +374,14 @@ app.post("/api/sections", authenticateToken, async (req: any, res) => {
     if (req.user.role !== UserRole.TEACHER && req.user.role !== UserRole.ADMIN) {
       return res.status(403).json({ error: "Access denied. Only teachers and admins can create sections." });
     }
+    // Admin can specify teacherId, Teacher is automatically assigned
+    const teacherId = (req.user.role === UserRole.ADMIN && req.body.teacherId) 
+      ? req.body.teacherId 
+      : req.user.id;
+
     const section = new Section({ 
       name: req.body.name, 
-      teacherId: req.user.id 
+      teacherId: teacherId 
     });
     await section.save();
     console.log("Section created:", section.name, "by", req.user.name);
