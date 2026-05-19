@@ -1585,8 +1585,12 @@ export default function App() {
           setUser(data);
           if (data.role === UserRole.TEACHER) setAppState("teacher_dashboard");
           else if (data.role === UserRole.ADMIN) setAppState("admin_dashboard");
-          else if (data.role === UserRole.STUDENT && !data.preTestCompleted) {
-            startCoursePreTest();
+          else if (data.role === UserRole.STUDENT) {
+            if (!data.preTestCompleted) {
+              startCoursePreTest();
+            } else {
+              setAppState("modules");
+            }
           }
         })
         .catch(() => {
@@ -1605,8 +1609,11 @@ export default function App() {
       const data = await res.json();
       setExercises(data);
       setCurrentIdx(0);
-      setCode(data[0].template);
+      if (data.length > 0) setCode(data[0].template);
       setAssessmentMode({ topic: "Course Baseline", type: "formative", id: "course-pretest" });
+      const total = data.reduce((acc: number, q: any) => acc + (q.difficulty === DifficultyLevel.HARD ? 3 : q.difficulty === DifficultyLevel.MEDIUM ? 2 : 1), 0);
+      setAssessmentTotalPoints(total);
+      setAssessmentScore(0);
       setAppState("solving");
     } catch (err) {
       console.error(err);
@@ -1670,10 +1677,14 @@ export default function App() {
     setUser(u);
     if (u.role === UserRole.TEACHER) setAppState("teacher_dashboard");
     else if (u.role === UserRole.ADMIN) setAppState("admin_dashboard");
-    else if (u.role === UserRole.STUDENT && !u.preTestCompleted) {
-      startCoursePreTest();
+    else if (u.role === UserRole.STUDENT) {
+      if (!u.preTestCompleted) {
+        startCoursePreTest();
+      } else {
+        setAppState("modules");
+      }
     }
-    else setAppState("solving");
+    else setAppState("modules");
   };
 
   const handleLogout = () => {
