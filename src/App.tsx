@@ -1017,6 +1017,56 @@ function StudentModules({ user, token, onStartAssessment }: { user: User; token:
 
   if (loading) return <div className="p-20 text-center font-bold text-gray-400">Loading modules...</div>;
 
+  if (!user.preTestCompleted) {
+    return (
+      <div className="max-w-[1128px] mx-auto px-4">
+        <div className="bg-white rounded-xl border border-linkedin-border shadow-xl overflow-hidden">
+          <div className="p-12 text-center space-y-8">
+            <div className="w-24 h-24 bg-linkedin-blue/10 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-linkedin-blue/20">
+              <GraduationCap className="text-linkedin-blue" size={48} />
+            </div>
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-4xl font-black text-linkedin-text tracking-tighter uppercase mb-4">Welcome to FIITS</h2>
+              <p className="text-lg text-linkedin-text-muted font-medium mb-8 leading-relaxed">
+                Before you begin your journey through our learning modules, you must complete a diagnostic pre-test. 
+                This will help us understand your current baseline in HTML, CSS, and JavaScript.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 text-left">
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle2 size={16} className="text-linkedin-blue" />
+                    <span className="font-bold text-xs uppercase">40 Questions</span>
+                  </div>
+                  <p className="text-[10px] text-gray-500">Comprehensive diagnostic covering HTML, CSS, and JS logic.</p>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BrainCircuit size={16} className="text-linkedin-blue" />
+                    <span className="font-bold text-xs uppercase">Medium & Hard</span>
+                  </div>
+                  <p className="text-[10px] text-gray-500">Designed to test your limits and identify growth areas.</p>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <RefreshCcw size={16} className="text-linkedin-blue" />
+                    <span className="font-bold text-xs uppercase">Baseline Only</span>
+                  </div>
+                  <p className="text-[10px] text-gray-500">This score establishes your starting point for modeling.</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => onStartAssessment("Course Baseline", "formative", "course-pretest")}
+                className="bg-linkedin-blue text-white px-12 py-4 rounded-full font-black uppercase tracking-widest text-sm shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3 mx-auto"
+              >
+                Begin Pre-test <ArrowRight size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const allSummativesPassed = MODULES.every(m => isModuleAssessPassed(m.id, 'summative'));
 
   return (
@@ -1586,11 +1636,7 @@ export default function App() {
           if (data.role === UserRole.TEACHER) setAppState("teacher_dashboard");
           else if (data.role === UserRole.ADMIN) setAppState("admin_dashboard");
           else if (data.role === UserRole.STUDENT) {
-            if (!data.preTestCompleted) {
-              startCoursePreTest();
-            } else {
-              setAppState("modules");
-            }
+            setAppState("modules");
           }
         })
         .catch(() => {
@@ -1648,7 +1694,6 @@ export default function App() {
                 } else {
                   setCurrentIdx(validatedExData.length - 1);
                   setCode(validatedExData[validatedExData.length - 1].template);
-                  setAppState("complete");
                 }
               } else {
                 setCode(validatedExData[0].template);
@@ -1678,11 +1723,7 @@ export default function App() {
     if (u.role === UserRole.TEACHER) setAppState("teacher_dashboard");
     else if (u.role === UserRole.ADMIN) setAppState("admin_dashboard");
     else if (u.role === UserRole.STUDENT) {
-      if (!u.preTestCompleted) {
-        startCoursePreTest();
-      } else {
-        setAppState("modules");
-      }
+      setAppState("modules");
     }
     else setAppState("modules");
   };
@@ -1812,7 +1853,7 @@ export default function App() {
           reflection,
           attempts,
           feedbackLogs,
-          exerciseId: assessmentMode ? `${assessmentMode.id}-${assessmentMode.type}` : ((currentExercise as any)?._id || currentExercise?.id),
+          exerciseId: assessmentMode ? `${assessmentMode.id}-${assessmentMode.type}-${(currentExercise as any)?._id || currentExercise?.id}` : ((currentExercise as any)?._id || currentExercise?.id),
           assessmentType: assessmentMode?.type || 'standard',
           score: assessmentMode ? assessmentScore : undefined,
           totalPoints: assessmentMode ? assessmentTotalPoints : undefined
