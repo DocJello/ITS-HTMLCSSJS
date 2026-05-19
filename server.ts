@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: Object.values(UserRole), required: true },
   sectionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Section' },
   preTestCompleted: { type: Boolean, default: false },
+  baselineQuestionIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Question' }],
 });
 
 const sectionSchema = new mongoose.Schema({
@@ -338,11 +339,31 @@ app.post("/api/auth/complete-pre-test", authenticateToken, async (req: any, res)
 });
 
 // Final-course assessment questions (same for pre and post)
-app.get("/api/assessments/course-baseline", authenticateToken, async (req, res) => {
+app.get("/api/assessments/course-baseline", authenticateToken, async (req: any, res) => {
    try {
-     // Pick top 10 questions as baseline (seeded questions first)
-     const baselineQuestions = await Question.find().limit(10);
-     res.json(baselineQuestions);
+     const user = await User.findById(req.user.id);
+     if (!user) return res.status(404).json({ error: "User not found" });
+
+     let questionIds = user.baselineQuestionIds;
+
+     if (!questionIds || questionIds.length === 0) {
+       // Generate new baseline
+       const questions = await Question.find({
+         difficulty: { $in: [DifficultyLevel.MEDIUM, DifficultyLevel.HARD] }
+       });
+       
+       // Shuffle and take 40
+       const shuffled = questions.sort(() => 0.5 - Math.random()).slice(0, 40);
+       questionIds = shuffled.map(q => q._id);
+       user.baselineQuestionIds = questionIds;
+       await user.save();
+     }
+
+     const baselineQuestions = await Question.find({ _id: { $in: questionIds } });
+     
+     // Shuffle the result for the specific activity
+     const shuffledResult = baselineQuestions.sort(() => 0.5 - Math.random());
+     res.json(shuffledResult);
    } catch (err: any) {
      res.status(500).json({ error: err.message });
    }
